@@ -1,4 +1,4 @@
-import { Logger, LoggerOptions } from "./logger";
+import { Logger, type LoggerOptions } from "./logger";
 
 let logger: Logger | undefined;
 
@@ -31,11 +31,11 @@ export function Traced<T>(name?: string, callback?: () => T): T | DecoratorFn {
     }
 
     if (typeof callback === "function") {
+        // Handle function call with a name and a callback
         if (!logger) {
             return callback();
         }
 
-        // Handle function call with a name and a callback
         return logger.trace(name ?? "Anonymous", callback);
     } else {
         // Handle decorator usage

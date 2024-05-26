@@ -1,20 +1,20 @@
 import { init, Traced } from ".";
 
-// const logger = init({
-//     apiKey: '1234',
-//     baseUrl: 'http://localhost:3000',
-//     debug: true,
-// });
+init({
+    apiKey: '1234',
+    baseUrl: 'http://localhost:3000',
+    debug: true,
+});
 
 export class Example {
-    @Traced()
+    @Traced('workflow')
     public async exampleMethod(): Promise<void> {
         console.log("Example method called");
         const res = Traced('openAI', () => {
             console.log("Inner method called");
+            this.exampleMethod2();
             return 1;
         });
-        this.exampleMethod2();
     }
 
     @Traced()

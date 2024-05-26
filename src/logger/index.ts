@@ -18,7 +18,8 @@ export class Logger {
     private static instance: Logger;
     private _state: State = new State();
     private tracesBuffer: Span[] = [];
-    private rootSpan: Span | undefined = undefined;
+
+    private _timeout: NodeJS.Timeout | null = null;
 
     private _apiKey: string;
     private _baseUrl: string;
@@ -28,6 +29,10 @@ export class Logger {
         this._apiKey = opts.apiKey;
         this._baseUrl = opts.baseUrl;
         this._debug = opts.debug || false;
+
+        this._timeout = setInterval(() => {
+            this.flush();
+        }, 5 * 1000); // 5 seconds
     }
 
     /** Get the singleton instance of the Logger */
@@ -41,7 +46,6 @@ export class Logger {
     /** Start a trace with the given name */
     public startTrace(name: string): Span {
         const span = new Span(null, name);
-        this.rootSpan = span;
         this.tracesBuffer.push(span);
         this._state._currentSpan.enterWith(span);
         return span;
@@ -95,8 +99,33 @@ export class Logger {
         });
 
         hasParentSpan ? span.endSpan() : this.endTrace();
-        console.log(`Exit - ${name}`, this.tracesBuffer);
+        console.log(`Exit - ${name}`, span);
 
         return result;
+    }
+
+    public async flush(): Promise<void> {
+        if (this.tracesBuffer.length === 0) {
+            return;
+        }
+
+        if (this._debug) {
+            console.log('Flushing traces', this.tracesBuffer);
+            this.tracesBuffer = [];
+        }
+
+        const result = await fetch(`${this._baseUrl}/api/v1/traces`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: this._apiKey,
+            },
+            body: JSON.stringify({
+                traces: this.tracesBuffer,
+            })
+        });
+        // TODO: Handle response
+
+        this.tracesBuffer = [];
     }
 }
