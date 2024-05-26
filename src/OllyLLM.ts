@@ -1,16 +1,8 @@
-class OllyLLMState {
-    public constructor() { }
-
-
-}
 
 class OllyLLM {
     private static instance: OllyLLM;
-    private state: OllyLLMState;
 
-    private constructor() {
-        this.state = new OllyLLMState();
-    }
+    private constructor() { }
 
     public static getInstance(): OllyLLM {
         if (!OllyLLM.instance) {

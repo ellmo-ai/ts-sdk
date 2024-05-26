@@ -1,20 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Log } from "./types";
+import { AsyncLocalStorage } from 'async_hooks';
+import { Log, ISpan, LogLevel } from "./types";
 
-interface ISpan {
-    id: string;
-    name: string;
-    startTime: number;
-    endTime: number | null;
-    logs: Log[];
-    childSpans: Span[];
-}
-
-enum LogLevel {
-    INFO = 'INFO',
-    WARN = 'WARN',
-    ERROR = 'ERROR',
-}
+const _currentSpan = new AsyncLocalStorage<Span | undefined>();
 
 class Span implements ISpan {
     public id: string;
@@ -31,7 +19,7 @@ class Span implements ISpan {
     }
 
     public startSpan(name: string): Span {
-        const span = new Span(null, name);
+        const span = new Span(this.id, name);
         this.childSpans.push(span);
         return span;
     }
@@ -41,82 +29,106 @@ class Span implements ISpan {
     }
 }
 
+export function getCurrentSpan(): Span | undefined {
+    return _currentSpan.getStore();
+}
+
+export function span<T>(name: string, callback: () => T): T {
+    const currentSpan = _currentSpan.getStore();
+    if (!currentSpan) {
+        throw new Error('No active span. Start a trace first.');
+    }
+    const span = currentSpan.startSpan(name);
+    return _currentSpan.run(span, () => {
+        let result: T;
+        try {
+            result = callback();
+        } catch (error) {
+            throw error;
+        } finally {
+            span.endSpan();
+        }
+        return result;
+    });
+}
+
 class Trace {
-    private rootSpan: Span | null = null;
-    private currentSpan: Span | null = null;
+    private rootSpan: Span | undefined = undefined;
     private tracesBuffer: Span[] = [];
 
     trace<T>(name: string, callback: () => T): T {
-        this.startTrace(name);
-
-        let result: T;
-        try {
-            console.log("Entry");
-            result = callback();
-        } catch (error) {
-            this.error({
-                error: error as Error,
-            });
-            throw error;
-        } finally {
-            console.log("Exit");
-            this.endSpan();
+        if (_currentSpan.getStore()) {
+            throw new Error('There is already an active trace.');
         }
 
-        return result;
+        this.startTrace(name);
+
+        return _currentSpan.run(this.rootSpan, () => {
+            let result: T;
+            try {
+                console.log("Entry", _currentSpan.getStore());
+                result = callback();
+            } catch (error) {
+                this.error({ error: error as Error });
+                throw error;
+            } finally {
+                console.log("Exit", _currentSpan.getStore());
+                this.endSpan();
+            }
+            return result;
+        });
     }
 
     public startTrace(name: string): Span {
         const span = new Span(null, name);
         this.rootSpan = span;
-        this.currentSpan = span;
+        _currentSpan.enterWith(span);
         return span;
     }
 
     public endTrace(): void {
-        if (!this.rootSpan) {
+        const rootSpan = _currentSpan.getStore();
+        if (!rootSpan) {
             throw new Error('No active trace to end.');
         }
-        this.rootSpan.endTime = Date.now();
-        this.tracesBuffer.push(this.rootSpan);
-        this.currentSpan = null;
-        this.rootSpan = null;
+        rootSpan.endSpan();
+        this.tracesBuffer.push(rootSpan);
+        _currentSpan.disable();
     }
 
     public startSpan(name: string): Span {
-        if (!this.currentSpan) {
+        const currentSpan = _currentSpan.getStore();
+        if (!currentSpan) {
             throw new Error('No active span. Start a trace first.');
         }
-        const span = new Span(this.currentSpan.id, name);
-        this.currentSpan.childSpans.push(span);
-        this.currentSpan = span;
+        const span = new Span(currentSpan.id, name);
+        currentSpan.childSpans.push(span);
+        _currentSpan.enterWith(span);
         return span;
     }
 
     public endSpan(): void {
-        if (!this.currentSpan) {
+        const currentSpan = _currentSpan.getStore();
+        if (!currentSpan) {
             throw new Error('No active span to end.');
         }
-        this.currentSpan.endTime = Date.now();
-        const parentSpan = this.findParentSpan(this.currentSpan);
+        currentSpan.endSpan();
+        const parentSpan = this.findParentSpan(currentSpan);
         if (parentSpan) {
-            this.currentSpan = parentSpan;
+            _currentSpan.enterWith(parentSpan);
         } else {
             this.tracesBuffer.push(this.rootSpan!);
-            this.currentSpan = null;
-            this.rootSpan = null;
+            _currentSpan.disable();
         }
     }
 
     private log(level: LogLevel, log: Log): void {
-        if (!this.currentSpan) {
+        const currentSpan = _currentSpan.getStore();
+        if (!currentSpan) {
             throw new Error('No active span to log message.');
         }
-        const _log = {
-            ...log,
-            timestamp: Date.now(),
-        };
-        this.currentSpan.logs.push(log);
+        const _log = { ...log, timestamp: Date.now() };
+        currentSpan.logs.push(_log);
     }
 
     info(log: Log): void {
@@ -151,19 +163,16 @@ type DecoratorFn = (target: unknown, propertyKey: string, descriptor: PropertyDe
 
 export function Traced(name?: string): DecoratorFn;
 export function Traced<T>(name: string, callback: () => T): T;
-export function Traced<T>(nameOrCallback?: string | (() => T), callback?: () => T): T | DecoratorFn {
-    if (typeof nameOrCallback === "function") {
-        // Handle function call with a callback
-        return new Trace().trace("Anonymous", nameOrCallback);
-    } else if (typeof callback === "function") {
+export function Traced<T>(name?: string, callback?: () => T): T | DecoratorFn {
+    if (typeof callback === "function") {
         // Handle function call with a name and a callback
-        return new Trace().trace(nameOrCallback ?? "Anonymous", callback);
+        return new Trace().trace(name ?? "Anonymous", callback);
     } else {
         // Handle decorator usage
         return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
             const originalMethod = descriptor.value;
             descriptor.value = function (...args: unknown[]) {
-                const nameToUse = nameOrCallback ?? `${target.constructor.name}.${propertyKey}`;
+                const nameToUse = name ?? `${target.constructor.name}.${propertyKey}`;
                 return new Trace().trace(nameToUse, originalMethod.bind(this, ...args));
             };
         };
