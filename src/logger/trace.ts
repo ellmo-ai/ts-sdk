@@ -4,7 +4,7 @@ import { Log, ISpan, LogLevel } from "./types";
 
 const _currentSpan = new AsyncLocalStorage<Span | undefined>();
 
-class Span implements ISpan {
+export class Span implements ISpan {
     public id: string;
     public startTime: number;
     public endTime: number | null = null;
@@ -33,26 +33,7 @@ export function getCurrentSpan(): Span | undefined {
     return _currentSpan.getStore();
 }
 
-export function span<T>(name: string, callback: () => T): T {
-    const currentSpan = _currentSpan.getStore();
-    if (!currentSpan) {
-        throw new Error('No active span. Start a trace first.');
-    }
-    const span = currentSpan.startSpan(name);
-    return _currentSpan.run(span, () => {
-        let result: T;
-        try {
-            result = callback();
-        } catch (error) {
-            throw error;
-        } finally {
-            span.endSpan();
-        }
-        return result;
-    });
-}
-
-class Trace {
+export class Trace {
     private rootSpan: Span | undefined = undefined;
     private tracesBuffer: Span[] = [];
 
@@ -156,25 +137,5 @@ class Trace {
             stack.push(...currentSpan.childSpans);
         }
         return null;
-    }
-}
-
-type DecoratorFn = (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) => void;
-
-export function Traced(name?: string): DecoratorFn;
-export function Traced<T>(name: string, callback: () => T): T;
-export function Traced<T>(name?: string, callback?: () => T): T | DecoratorFn {
-    if (typeof callback === "function") {
-        // Handle function call with a name and a callback
-        return new Trace().trace(name ?? "Anonymous", callback);
-    } else {
-        // Handle decorator usage
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
-            const originalMethod = descriptor.value;
-            descriptor.value = function (...args: unknown[]) {
-                const nameToUse = name ?? `${target.constructor.name}.${propertyKey}`;
-                return new Trace().trace(nameToUse, originalMethod.bind(this, ...args));
-            };
-        };
     }
 }
