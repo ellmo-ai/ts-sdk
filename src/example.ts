@@ -1,4 +1,4 @@
-import { init, Traced } from ".";
+import { init, Tracing } from ".";
 
 init({
     apiKey: '1234',
@@ -7,17 +7,17 @@ init({
 });
 
 export class Example {
-    @Traced('workflow')
-    public async exampleMethod(): Promise<void> {
+    @Tracing.trace('workflow')
+    public async exampleMethod(): Promise<number> {
         console.log("Example method called");
-        const res = Traced('openAI', () => {
+        return Tracing.trace('openAI', () => {
             console.log("Inner method called");
             this.exampleMethod2();
             return 1;
         });
     }
 
-    @Traced()
+    @Tracing.trace()
     public async exampleMethod2(): Promise<void> {
         console.log("Example method2 called");
     }

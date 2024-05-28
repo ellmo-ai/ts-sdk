@@ -21,34 +21,37 @@ export function init(opts: LoggerOptions): Logger {
     return logger;
 }
 
-type DecoratorFn = (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) => void;
 
-export function Traced(name?: string): DecoratorFn;
-export function Traced<T>(name: string, callback: () => T): T;
-export function Traced<T>(name?: string, callback?: () => T): T | DecoratorFn {
-    if (!logger) {
-        console.warn('OllyLLM: Logger not initialized. Call init() before using Traced.');
-    }
+export namespace Tracing {
+    type DecoratorFn = (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) => void;
 
-    if (typeof callback === "function") {
-        // Handle function call with a name and a callback
+    export function trace(name?: string): DecoratorFn;
+    export function trace<T>(name: string, callback: () => T): T;
+    export function trace<T>(name?: string, callback?: () => T): T | DecoratorFn {
         if (!logger) {
-            return callback();
+            console.warn('OllyLLM: Logger not initialized. Call init() before using Traced.');
         }
 
-        return logger.trace(name ?? "Anonymous", callback);
-    } else {
-        // Handle decorator usage
-        return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
-            const originalMethod = descriptor.value;
-            descriptor.value = function (...args: unknown[]) {
-                if (!logger) {
-                    return originalMethod.bind(this, ...args)();
-                }
+        if (typeof callback === "function") {
+            // Handle function call with a name and a callback
+            if (!logger) {
+                return callback();
+            }
 
-                const nameToUse = name ?? `${target.constructor.name}.${propertyKey}`;
-                return logger.trace(nameToUse, originalMethod.bind(this, ...args));
+            return logger.trace(name ?? "Anonymous", callback);
+        } else {
+            // Handle decorator usage
+            return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
+                const originalMethod = descriptor.value;
+                descriptor.value = function (...args: unknown[]) {
+                    if (!logger) {
+                        return originalMethod.bind(this, ...args)();
+                    }
+
+                    const nameToUse = name ?? `${target.constructor.name}.${propertyKey}`;
+                    return logger.trace(nameToUse, originalMethod.bind(this, ...args));
+                };
             };
-        };
+        }
     }
 }
