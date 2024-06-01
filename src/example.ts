@@ -1,9 +1,9 @@
 import { init, Tracing } from ".";
 
-init({
+const logger = init({
     apiKey: '1234',
     baseUrl: 'http://localhost:3000',
-    debug: true,
+    debug: false,
 });
 
 export class Example {

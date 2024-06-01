@@ -8,11 +8,11 @@ export class Span implements ISpan {
     public id: string;
     public startTime: number;
     public endTime: number | null = null;
-    public logs: Log[] = [];
+    // public logs: Log[] = [];
     public childSpans: Span[] = [];
 
     public constructor(
-        public parentSpanId: string | null, public name: string
+        public parentSpanId: string | null, public operationName: string
     ) {
         this.id = uuidv4();
         this.startTime = Date.now();
@@ -109,7 +109,7 @@ export class Trace {
             throw new Error('No active span to log message.');
         }
         const _log = { ...log, timestamp: Date.now() };
-        currentSpan.logs.push(_log);
+        // currentSpan.logs.push(_log);
     }
 
     info(log: Log): void {

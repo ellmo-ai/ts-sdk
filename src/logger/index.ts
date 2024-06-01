@@ -104,6 +104,7 @@ export class Logger {
         return result;
     }
 
+    /** Flush the traces buffer to the server. */
     public async flush(): Promise<void> {
         if (this.tracesBuffer.length === 0) {
             return;
@@ -112,9 +113,10 @@ export class Logger {
         if (this._debug) {
             console.log('Flushing traces', this.tracesBuffer);
             this.tracesBuffer = [];
+            return;
         }
 
-        const result = await fetch(`${this._baseUrl}/api/v1/traces`, {
+        const result = await fetch(`${this._baseUrl}/api/v1/tracing`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

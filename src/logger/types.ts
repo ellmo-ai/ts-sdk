@@ -11,10 +11,10 @@ export type Log = {
 
 export interface ISpan {
     id: string;
-    name: string;
+    operationName: string;
     startTime: number;
     endTime: number | null;
-    logs: Log[];
+    // logs: Log[];
     childSpans: ISpan[];
 }
 

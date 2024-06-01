@@ -15,7 +15,7 @@ export function init(opts: LoggerOptions): Logger {
     logger = Logger.getInstance({
         apiKey: opts.apiKey,
         baseUrl: opts.baseUrl,
-        debug: opts.debug || !isProduction,
+        debug: opts.debug,
     });
 
     return logger;
