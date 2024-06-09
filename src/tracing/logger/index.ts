@@ -1,4 +1,4 @@
-import { Logger, type LoggerOptions } from "./logger";
+import { Logger, type LoggerOptions } from "./Logger";
 
 let logger: Logger | undefined;
 
