@@ -1,7 +1,9 @@
 import { Logger, type LoggerOptions } from "./Logger";
+import { Span } from "./trace";
 
 let logger: Logger | undefined;
 
+/** Initialize the logger */
 export function init(opts: LoggerOptions): Logger {
     const isProduction = process.env.NODE_ENV === 'production';
 
@@ -25,6 +27,12 @@ export function init(opts: LoggerOptions): Logger {
 export namespace Tracing {
     type DecoratorFn = (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) => void;
 
+    /** Retrieve the current span if any */
+    export function currentSpan(): Span | undefined {
+        return logger?.currentSpan();
+    }
+
+    /** Trace a function call */
     export function trace(name?: string): DecoratorFn;
     export function trace<T>(name: string, callback: () => T): T;
     export function trace<T>(name?: string, callback?: () => T): T | DecoratorFn {

@@ -6,7 +6,7 @@ export type Log = {
     message: string;
 } | {
     /** The error message */
-    error: Error;
+    error?: Error;
 });
 
 export interface ISpan {

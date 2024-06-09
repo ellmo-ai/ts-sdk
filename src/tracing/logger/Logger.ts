@@ -62,13 +62,14 @@ export class Logger {
     }
 
     /** Start a span with the given name */
-    public startSpan(name: string): void {
+    public startSpan(name: string): Span {
         const currentSpan = this._state._currentSpan.getStore();
         if (!currentSpan) {
             throw new Error('No active trace to start a span.');
         }
         const span = currentSpan.startSpan(name);
         this._state._currentSpan.enterWith(span);
+        return span;
     }
 
     /** End the current span */
@@ -78,6 +79,11 @@ export class Logger {
             currentSpan.endSpan();
         }
         this._state._currentSpan.disable();
+    }
+
+    /** Retrieve the current span if any */
+    public currentSpan(): Span | undefined {
+        return this._state._currentSpan.getStore();
     }
 
     /** Trace a callback with the given name */

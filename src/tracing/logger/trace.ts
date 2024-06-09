@@ -8,7 +8,7 @@ export class Span implements ISpan {
     public id: string;
     public startTime: number;
     public endTime: number | null = null;
-    // public logs: Log[] = [];
+    public logs: Log[] = [];
     public childSpans: Span[] = [];
 
     public constructor(
@@ -22,6 +22,13 @@ export class Span implements ISpan {
         const span = new Span(this.id, name);
         this.childSpans.push(span);
         return span;
+    }
+
+    public log(log: Log): void {
+        if (process.env.NODE_ENV === 'development') {
+            console.log(log);
+        }
+        this.logs.push(log);
     }
 
     public endSpan(): void {

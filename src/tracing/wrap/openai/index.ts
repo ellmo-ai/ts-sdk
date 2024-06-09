@@ -5,11 +5,12 @@ import { CompletionCreateFunction } from './types';
 export function wrappedOpenAI(client: OpenAI) {
     let completionProxy = new Proxy(client.chat.completions, {
         get(target, name, receiver) {
-            const baseVal = Reflect.get(target, name, receiver);
+            const selectedValue = Reflect.get(target, name, receiver);
             if (name === "create") {
-                return wrapChatCompletion(baseVal.bind(target));
+                // Trace the method
+                return wrapChatCompletion(selectedValue.bind(target));
             }
-            return baseVal;
+            return selectedValue;
         },
     });
 
@@ -37,8 +38,20 @@ function wrapChatCompletion(
 ): (...params: Parameters<CompletionCreateFunction>) => Promise<unknown> {
     return async (...params) => {
         const [body, options] = params;
-        return Tracing.trace('openai.chat.completions.create', () => {
-            return completion(body, options);
+        return Tracing.trace('openai.chat.completions.create', async () => {
+            // @ts-ignore FIXME:
+            const { messages, model } = body;
+
+            const currentSpan = Tracing.currentSpan();
+            // TODO: this should be an attribute instead
+            currentSpan?.log({ metadata: { model, messages } });
+
+            try {
+                const { data, response } = await completion(body, options).withResponse();
+                return data;
+            } finally {
+                // end
+            }
         });
     };
 }
