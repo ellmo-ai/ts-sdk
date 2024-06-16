@@ -1,3 +1,4 @@
+import { Test } from "../test";
 import { Logger, type LoggerOptions } from "./Logger";
 import { Span } from "./trace";
 
@@ -32,6 +33,20 @@ export namespace Tracing {
         return logger?.currentSpan();
     }
 
+    export function traceWithTests<T>(name: string, tests: Test<T>[], callback: () => T): T {
+        if (!logger) {
+            return callback();
+        }
+
+        const result = trace(name, callback);
+
+        tests.forEach(test => {
+            // TODO: send the tests to the backend
+        });
+
+        return result;
+    }
+
     /** Trace a function call */
     export function trace(name?: string): DecoratorFn;
     export function trace<T>(name: string, callback: () => T): T;
@@ -63,3 +78,9 @@ export namespace Tracing {
         }
     }
 }
+
+const test1: Test<number> = {
+    id: '1',
+    version: '1.0',
+    func: (input: number) => input * 2,
+};

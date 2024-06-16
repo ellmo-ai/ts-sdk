@@ -32,6 +32,9 @@ export function wrappedOpenAI(client: OpenAI) {
         },
     });
 }
+export interface Test {
+    version: string;
+}
 
 function wrapChatCompletion(
     completion: CompletionCreateFunction,
@@ -48,6 +51,7 @@ function wrapChatCompletion(
 
             try {
                 const { data, response } = await completion(body, options).withResponse();
+                // send the tests and the response
                 return data;
             } finally {
                 // end

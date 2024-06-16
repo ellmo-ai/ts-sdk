@@ -1,6 +1,7 @@
-import { init, Tracing } from "./tracing/logger";
-import { wrappedOpenAI } from "./tracing/wrap/openai";
-import { OpenAI } from 'openai';
+import { init, Tracing } from "../tracing/logger";
+import { Test } from "../tracing/test";
+import { wrappedOpenAI } from "../tracing/wrap/openai";
+import { OpenAI } from "openai";
 
 const logger = init({
     apiKey: '1234',
@@ -36,12 +37,10 @@ const openai = new OpenAI({
 });
 const wrappedClient = wrappedOpenAI(openai);
 
-wrappedClient.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [
-        { role: 'system', content: 'You are a helpful assistant.' },
-        { role: 'user', content: 'What is the meaning of life?' },
-    ],
-}, { stream: true }).then((response) => {
-    console.log(response);
-});
+const test: Test<any> = {
+    id: '1',
+    version: '1.0',
+    func: ({ results, output }: any) => {
+        return output;
+    }
+};
