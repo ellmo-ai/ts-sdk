@@ -1,11 +1,10 @@
 import { AsyncLocalStorage } from 'async_hooks';
-import { Span, Trace } from "./trace";
+import { Span } from "./trace";
+import { omit } from '../../util/omit';
 
 class State {
     public _currentSpan: AsyncLocalStorage<Span | undefined> = new AsyncLocalStorage<Span | undefined>();
     public _currentLogger: AsyncLocalStorage<Logger | undefined> = new AsyncLocalStorage<Logger | undefined>();
-
-    public constructor() { }
 }
 
 export type LoggerOptions = {
@@ -17,7 +16,7 @@ export type LoggerOptions = {
 export class Logger {
     private static instance: Logger;
     private _state: State = new State();
-    private tracesBuffer: Span[] = [];
+    private tracesBuffer: Omit<Span, 'childSpans'>[] = [];
 
     private _timeout: NodeJS.Timeout | null = null;
 
@@ -30,9 +29,7 @@ export class Logger {
         this._baseUrl = opts.baseUrl;
         this._debug = opts.debug || false;
 
-        this._timeout = setInterval(() => {
-            this.flush();
-        }, 5 * 1000); // 5 seconds
+        this._timeout = setInterval(() => this.flush, 5 * 1000); // 5 seconds
     }
 
     /** Get the singleton instance of the Logger */
@@ -45,8 +42,9 @@ export class Logger {
 
     /** Start a trace with the given name */
     public startTrace(name: string): Span {
-        const span = new Span(null, name);
-        this.tracesBuffer.push(span);
+        const parentSpan = this._state._currentSpan.getStore();
+        const span = new Span(name, parentSpan?.id); // Add parent span id if any
+        this.addSpanToBuffer(span);
         this._state._currentSpan.enterWith(span);
         return span;
     }
@@ -58,7 +56,12 @@ export class Logger {
             throw new Error('No active trace to end.');
         }
         currentSpan.endSpan();
+        this.addSpanToBuffer(currentSpan);
         this._state._currentSpan.disable();
+    }
+
+    private addSpanToBuffer(span: Span): void {
+        this.tracesBuffer.push(omit(span, ['childSpans']));
     }
 
     /** Start a span with the given name */
@@ -122,18 +125,25 @@ export class Logger {
             return;
         }
 
-        const result = await fetch(`${this._baseUrl}/api/v1/tracing`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: this._apiKey,
-            },
-            body: JSON.stringify({
-                traces: this.tracesBuffer,
-            })
-        });
-        // TODO: Handle response
+        try {
+            const result = await fetch(`${this._baseUrl}/api/v1/tracing`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: this._apiKey,
+                },
+                body: JSON.stringify({
+                    traces: this.tracesBuffer,
+                })
+            });
 
-        this.tracesBuffer = [];
+            if (!result.ok) {
+                throw new Error('Failed to flush traces');
+            }
+        } catch (error) {
+            console.error('Failed to flush traces', error);
+        } finally {
+            this.tracesBuffer = [];
+        }
     }
 }
