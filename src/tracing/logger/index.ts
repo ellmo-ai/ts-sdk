@@ -1,4 +1,4 @@
-import { Test } from "../test";
+import { Test } from "../../test";
 import { Logger, type LoggerOptions } from "./Logger";
 import { Span } from "./trace";
 

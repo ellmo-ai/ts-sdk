@@ -1,6 +1,5 @@
-import { init, Tracing } from "../tracing/logger";
-import { Test } from "../tracing/test";
-import { wrappedOpenAI } from "../tracing/wrap/openai";
+import { init, Tracing } from "../src/tracing/logger";
+import { wrappedOpenAI } from "../src/tracing/wrap/openai";
 import { OpenAI } from "openai";
 
 const logger = init({
@@ -36,11 +35,3 @@ const openai = new OpenAI({
     apiKey: '1234',
 });
 const wrappedClient = wrappedOpenAI(openai);
-
-const test: Test<any> = {
-    id: '1',
-    version: '1.0',
-    func: ({ results, output }: any) => {
-        return output;
-    }
-};
