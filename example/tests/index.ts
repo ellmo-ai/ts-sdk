@@ -1,1 +1,2 @@
-export { noUUID } from './noUUID.olly';
+export { noUUID } from './simple/noUUID.olly';
+// export { noProfanity } from './noProfanity';

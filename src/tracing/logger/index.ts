@@ -78,9 +78,3 @@ export namespace Tracing {
         }
     }
 }
-
-const test1: Test<number> = {
-    id: '1',
-    version: '1.0',
-    func: (input: number) => input * 2,
-};
