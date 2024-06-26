@@ -97,7 +97,7 @@ function getTestsInFile(sourceFile: ts.SourceFile): { id: string, version: strin
 }
 
 
-function processFiles(testsDir: string): void {
+function processTestDir(testsDir: string): void {
     const exportedTestPaths = getExportedTests(testsDir).map((test) => path.join(testsDir, test));
 
     const shouldProcessFile = (file: string) => {
@@ -106,56 +106,53 @@ function processFiles(testsDir: string): void {
     }
 
     const testsToUpdate: Map<String, { id: string, version: string }> = new Map();
+    const testIds: Set<String> = new Set();
 
     function processDir(dir: string, isDir: boolean = false) {
         const dirFiles = fs.readdirSync(dir);
         for (const file of dirFiles) {
-            // Recursively process directories
             if (fs.statSync(path.join(dir, file)).isDirectory()) {
-                processDir(path.join(dir, file), true);
+                // Recursively process directories
+                processDir(path.join(dir, file), true /* isDir */);
+            } else if (shouldProcessFile(file)) {
+                console.log(`Processing file: ${file}`);
+                const filePath = path.join(dir, file);
+
+                const sourceFile = ts.createSourceFile(
+                    filePath,
+                    fs.readFileSync(filePath, 'utf-8'),
+                    ts.ScriptTarget.Latest,
+                    true
+                );
+
+                const tests = getTestsInFile(sourceFile);
+                tests.forEach(test => {
+                    if (testIds.has(test.id)) {
+                        console.error(`Error: Test ID ${test.id} is duplicated in ${filePath}`);
+                        process.exit(1);
+                    }
+
+                    testIds.add(test.id);
+
+                    // Assuming test.id is unique and can be used as a key
+                    if (testsToUpdate.has(filePath)) {
+                        // Update logic here, if needed
+                        // For example, to update the version if the new one is higher
+                        const existingTest = testsToUpdate.get(test.id);
+                        if (existingTest && existingTest.version < test.version) {
+                            testsToUpdate.set(filePath, test);
+                        }
+                    } else {
+                        testsToUpdate.set(filePath, test);
+                    }
+                });
             }
-
-            if (!shouldProcessFile(file)) {
-                continue;
-            }
-
-            const filePath = path.join(dir, file);
-
-            const sourceFile = ts.createSourceFile(
-                filePath,
-                fs.readFileSync(filePath, 'utf-8'),
-                ts.ScriptTarget.Latest,
-                true
-            );
-
-            const tests = getTestsInFile(sourceFile);
         }
     }
 
-    const testFiles = fs.readdirSync(testsDir);
-    for (const file of testFiles) {
-        const filePath = path.join(testsDir, file);
-        // Recursively process directories
-        if (fs.statSync(filePath).isDirectory()) {
-            processDir(path.join(testsDir, file));
-        }
+    processDir(testsDir); // Start processing from the root tests directory
 
-        if (!file.endsWith('.ts') || file === 'index.ts') {
-            // Ignore non-ts files and the index.ts file
-            continue;
-        }
-
-        const isExported = exportedTestPaths.some((testPath) => {
-            return testPath === filePath.replace('.ts', '');
-        });
-
-        const tests = processFile(filePath, testsDir);
-
-        if (!isExported && tests.length > 0) {
-            console.warn(`Warn: Test file ${filePath} is not exported in the index.ts file.`);
-            continue;
-        }
-    }
+    console.log('Tests to update:', testsToUpdate);
 }
 
 program
@@ -178,7 +175,7 @@ program
             process.exit(1);
         }
 
-        processFiles(testsDir);
+        processTestDir(testsDir);
         console.log('All test files validated successfully.');
     });
 
