@@ -1,11 +1,14 @@
 name: Gen Protos
 on:
+  pull_request:
   repository_dispatch:
     types: [proto_update]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      COMMIT_SHA: ${{ github.event.client_payload.COMMIT_SHA || github.sha }}
     
     steps:
       - name: Checkout proto files
@@ -22,6 +25,11 @@ jobs:
           token: ${{ secrets.SYNC_TOKEN }}
           path: sdk
 
+      - name: List sdk directory contents
+        run: |
+          ls -la sdk
+          ls -la backend
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -33,29 +41,44 @@ jobs:
           github_token: ${{ github.token }}
 
       - name: Install buf TS dependencies
-        run: npm install -g @bufbuild/protoc-gen-es @bufbuild/protobuf
+        working-directory: sdk
+        run: npm install @bufbuild/protoc-gen-es @bufbuild/protobuf
+
+      - name: Copy proto files to sdk directory
+        run: |
+          mkdir -p sdk/proto/
+          cp backend/proto/src/*.proto sdk/proto/
 
       - name: Generate protos
-        working-directory: ${{ github.workspace }}
-        run: buf generate --config ${{ github.workspace }}/sdk/buf.gen.yaml --path ${{ github.workspace }}/backend/proto --output ${{ github.workspace }}/sdk
+        working-directory: sdk
+        run: buf generate proto
 
-      - name: Commit changes
-        working-directory: ${{ github.workspace }}
-        env:
-          BRANCH: sync/${{ github.event.client_payload.COMMIT_SHA }}
+      - name: Check if there are changes
+        working-directory: sdk
         run: |
-          cd sdk
-          git checkout -b $BRANCH           
-          git add .
-          git commit -m "Generate proto @ ${{ github.event.client_payload.COMMIT_SHA }}"
-          git push origin $BRANCH
+          git diff src --exit-code || exit 0
+
+      # - name: Commit changes
+      #   working-directory: ${{ github.workspace }}/sdk
+      #   env:
+      #     BRANCH: sync/${{ env.COMMIT_SHA }}
+      #   run: |
+      #     git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      #     git config --global user.name "github-actions[bot]"
+      #     git checkout -b $BRANCH           
+      #     git add src
+      #     git commit -m "Generate proto @ ${{ env.COMMIT_SHA }}"
+      #     git push origin $BRANCH
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
-          path: sdk
+          path: sdk # Relative to GITHUB_WORKSPACE
+          add-paths: src
           token: ${{ secrets.SYNC_TOKEN }}
           base: main
-          head: sync/${{ github.event.client_payload.COMMIT_SHA }}
-          title: "Sync Generate proto @ ${{ github.event.client_payload.COMMIT_SHA }}"
+          head: ${{ env.BRANCH }}
+          title: "Sync Generate proto @ ${{ env.COMMIT_SHA }}"
           body: "This PR was created automatically by GitHub Action."
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
