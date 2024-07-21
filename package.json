@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@protobuf-ts/plugin": "^2.9.4",
     "axios": "^1.7.2",
     "commander": "^12.1.0",
     "openai": "^4.51.0",

@@ -1,6 +1,5 @@
 name: Gen Protos
 on:
-  pull_request:
   repository_dispatch:
     types: [proto_update]
 
@@ -25,11 +24,6 @@ jobs:
           token: ${{ secrets.SYNC_TOKEN }}
           path: sdk
 
-      - name: List sdk directory contents
-        run: |
-          ls -la sdk
-          ls -la backend
-
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -38,7 +32,7 @@ jobs:
       - name: Setup buf
         uses: bufbuild/buf-setup-action@v1.34.0
         with:
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.SYNC_TOKEN }}
 
       - name: Install buf TS dependencies
         working-directory: sdk
@@ -57,18 +51,6 @@ jobs:
         working-directory: sdk
         run: |
           git diff --exit-code src || exit 0
-
-      # - name: Commit changes
-      #   working-directory: ${{ github.workspace }}/sdk
-      #   env:
-      #     BRANCH: sync/${{ env.COMMIT_SHA }}
-      #   run: |
-      #     git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      #     git config --global user.name "github-actions[bot]"
-      #     git checkout -b $BRANCH           
-      #     git add src
-      #     git commit -m "Generate proto @ ${{ env.COMMIT_SHA }}"
-      #     git push origin $BRANCH
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
