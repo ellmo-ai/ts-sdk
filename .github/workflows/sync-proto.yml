@@ -27,7 +27,10 @@ jobs:
         with:
           node-version: '16'  # Specify the desired Node.js version
 
-      - name: Install buf
+      - name: Setup buf
+        uses: bufbuild/buf-setup-action@v1.34.0
+
+      - name: Install buf TS dependencies
         run: npm install -g @bufbuild/protoc-gen-es @bufbuild/protobuf
 
       - name: Generate protos
