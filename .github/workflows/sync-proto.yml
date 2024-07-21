@@ -1,0 +1,49 @@
+name: Gen Protos
+on:
+  repository_dispatch:
+    types: [proto_update]
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout proto files
+        uses: actions/checkout@v3
+        with:
+          repository: ollyLLM/backend
+          token: $ {{ secrets.SYNC_TOKEN }}
+          path: backend
+
+      - name: Checkout sdk
+        uses: actions/checkout@v3
+        with:
+          path: sdk
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+
+      - name: Install buf
+        run: npm -g install @bufbuild/protoc-gen-es @bufbuild/protobuf
+
+      - name: Generate protos
+        run: buf generate --config sdk/buf.gen.yaml --path backend/proto --output sdk
+
+      - name: Commit changes
+        env:
+          BRANCH: sync/${{ github.event.client_payload.COMMIT_SHA }}
+        run: |
+          cd sdk
+          git checkout -b $BRANCH           
+          git add .
+          git commit -m "Generate proto @ ${{ github.event.client_paylaod.COMMIT_SHA }}"
+          git push origin $BRANCH
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.SYNC_TOKEN }}
+          base: main
+          head: sync/${{ github.event.client_payload.COMMIT_SHA }}
+          title: "Sync Generate proto @ ${{ github.event.client_paylaod.COMMIT_SHA }}"
+          body: "This PR was created automatically by GitHub Action."
