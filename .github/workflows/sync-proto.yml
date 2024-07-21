@@ -42,7 +42,7 @@ jobs:
 
       - name: Install buf TS dependencies
         working-directory: sdk
-        run: npm install @bufbuild/protoc-gen-es @bufbuild/protobuf
+        run: npm install @protobuf-ts/plugin
 
       - name: Copy proto files to sdk directory
         run: |
@@ -56,7 +56,7 @@ jobs:
       - name: Check if there are changes
         working-directory: sdk
         run: |
-          git diff src --exit-code || exit 0
+          git diff --exit-code src || exit 0
 
       # - name: Commit changes
       #   working-directory: ${{ github.workspace }}/sdk
@@ -79,6 +79,7 @@ jobs:
           base: main
           head: ${{ env.BRANCH }}
           title: "Sync Generate proto @ ${{ env.COMMIT_SHA }}"
-          body: "This PR was created automatically by GitHub Action."
-          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          body: |
+            Update proto files in sdk with latest changes from backend
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
