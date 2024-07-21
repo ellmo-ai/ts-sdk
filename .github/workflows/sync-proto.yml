@@ -29,6 +29,8 @@ jobs:
 
       - name: Setup buf
         uses: bufbuild/buf-setup-action@v1.34.0
+        with:
+          github_token: ${{ github.token }}
 
       - name: Install buf TS dependencies
         run: npm install -g @bufbuild/protoc-gen-es @bufbuild/protobuf
