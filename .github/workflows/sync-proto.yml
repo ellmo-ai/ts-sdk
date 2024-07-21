@@ -36,9 +36,11 @@ jobs:
         run: npm install -g @bufbuild/protoc-gen-es @bufbuild/protobuf
 
       - name: Generate protos
-        run: buf generate --config sdk/buf.gen.yaml --path backend/proto --output sdk
+        working-directory: ${{ github.workspace }}
+        run: buf generate --config ${{ github.workspace }}/sdk/buf.gen.yaml --path ${{ github.workspace }}/backend/proto --output ${{ github.workspace }}/sdk
 
       - name: Commit changes
+        working-directory: ${{ github.workspace }}
         env:
           BRANCH: sync/${{ github.event.client_payload.COMMIT_SHA }}
         run: |
@@ -51,6 +53,7 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
+          path: sdk
           token: ${{ secrets.SYNC_TOKEN }}
           base: main
           head: sync/${{ github.event.client_payload.COMMIT_SHA }}
