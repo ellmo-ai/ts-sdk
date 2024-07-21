@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@bufbuild/protobuf": "^1.10.0",
+    "@bufbuild/protoc-gen-es": "^1.10.0",
     "axios": "^1.7.2",
     "commander": "^12.1.0",
     "openai": "^4.51.0",
