@@ -18,9 +18,9 @@ import { Timestamp } from "./google/protobuf/timestamp";
  */
 export interface SpanCreationRequest {
     /**
-     * @generated from protobuf field: int32 id = 1;
+     * @generated from protobuf field: string id = 1;
      */
-    id: number; // ID of the span
+    id: string; // ID of the span
     /**
      * @generated from protobuf field: google.protobuf.Timestamp start_timestamp = 2;
      */
@@ -34,11 +34,15 @@ export interface SpanCreationRequest {
      */
     operationName: string; // Name of the operation that span takes place in
     /**
-     * @generated from protobuf field: int32 parent_id = 5;
+     * @generated from protobuf field: string parent_id = 5;
      */
-    parentId: number; // ID of the span's parent, if exists
+    parentId: string; // ID of the span's parent, if exists
     /**
-     * @generated from protobuf field: string external_uuid = 6;
+     * @generated from protobuf field: string trace_id = 6;
+     */
+    traceId: string; // ID of the span's trace
+    /**
+     * @generated from protobuf field: string external_uuid = 7;
      */
     externalUuid: string; // User facing ID of the span
 }
@@ -46,19 +50,21 @@ export interface SpanCreationRequest {
 class SpanCreationRequest$Type extends MessageType<SpanCreationRequest> {
     constructor() {
         super("ollyllm.SpanCreationRequest", [
-            { no: 1, name: "id", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "start_timestamp", kind: "message", T: () => Timestamp },
             { no: 3, name: "end_timestamp", kind: "message", T: () => Timestamp },
             { no: 4, name: "operation_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "parent_id", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 6, name: "external_uuid", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 5, name: "parent_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "trace_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "external_uuid", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<SpanCreationRequest>): SpanCreationRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.id = 0;
+        message.id = "";
         message.operationName = "";
-        message.parentId = 0;
+        message.parentId = "";
+        message.traceId = "";
         message.externalUuid = "";
         if (value !== undefined)
             reflectionMergePartial<SpanCreationRequest>(this, message, value);
@@ -69,8 +75,8 @@ class SpanCreationRequest$Type extends MessageType<SpanCreationRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* int32 id */ 1:
-                    message.id = reader.int32();
+                case /* string id */ 1:
+                    message.id = reader.string();
                     break;
                 case /* google.protobuf.Timestamp start_timestamp */ 2:
                     message.startTimestamp = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.startTimestamp);
@@ -81,10 +87,13 @@ class SpanCreationRequest$Type extends MessageType<SpanCreationRequest> {
                 case /* string operation_name */ 4:
                     message.operationName = reader.string();
                     break;
-                case /* int32 parent_id */ 5:
-                    message.parentId = reader.int32();
+                case /* string parent_id */ 5:
+                    message.parentId = reader.string();
                     break;
-                case /* string external_uuid */ 6:
+                case /* string trace_id */ 6:
+                    message.traceId = reader.string();
+                    break;
+                case /* string external_uuid */ 7:
                     message.externalUuid = reader.string();
                     break;
                 default:
@@ -99,9 +108,9 @@ class SpanCreationRequest$Type extends MessageType<SpanCreationRequest> {
         return message;
     }
     internalBinaryWrite(message: SpanCreationRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* int32 id = 1; */
-        if (message.id !== 0)
-            writer.tag(1, WireType.Varint).int32(message.id);
+        /* string id = 1; */
+        if (message.id !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.id);
         /* google.protobuf.Timestamp start_timestamp = 2; */
         if (message.startTimestamp)
             Timestamp.internalBinaryWrite(message.startTimestamp, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
@@ -111,12 +120,15 @@ class SpanCreationRequest$Type extends MessageType<SpanCreationRequest> {
         /* string operation_name = 4; */
         if (message.operationName !== "")
             writer.tag(4, WireType.LengthDelimited).string(message.operationName);
-        /* int32 parent_id = 5; */
-        if (message.parentId !== 0)
-            writer.tag(5, WireType.Varint).int32(message.parentId);
-        /* string external_uuid = 6; */
+        /* string parent_id = 5; */
+        if (message.parentId !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.parentId);
+        /* string trace_id = 6; */
+        if (message.traceId !== "")
+            writer.tag(6, WireType.LengthDelimited).string(message.traceId);
+        /* string external_uuid = 7; */
         if (message.externalUuid !== "")
-            writer.tag(6, WireType.LengthDelimited).string(message.externalUuid);
+            writer.tag(7, WireType.LengthDelimited).string(message.externalUuid);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
