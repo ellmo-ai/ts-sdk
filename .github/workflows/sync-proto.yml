@@ -2,6 +2,7 @@ name: Gen Protos
 on:
   repository_dispatch:
     types: [proto_update]
+  workflow_dispatch:
 
 jobs:
   build:
