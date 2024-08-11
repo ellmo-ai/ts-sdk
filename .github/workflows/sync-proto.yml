@@ -41,7 +41,7 @@ jobs:
       - name: Copy proto files to sdk directory
         run: |
           mkdir -p sdk/proto/
-          cp backend/proto/src/*.proto sdk/proto/
+          cp -a backend/proto/definitions/ sdk/proto/
 
       - name: Generate protos
         working-directory: sdk
