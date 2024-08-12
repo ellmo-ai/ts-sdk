@@ -25,6 +25,11 @@ jobs:
           token: ${{ secrets.SYNC_TOKEN }}
           path: sdk
 
+      - name: List sdk directory contents
+        run: |
+          ls -la sdk
+          ls -la backend
+
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -43,6 +48,11 @@ jobs:
         run: |
           mkdir -p sdk/proto/
           cp -a backend/proto/src/definitions/ sdk/proto/
+
+      - name: List sdk directory contents
+        working-direcotry: sdk
+        run: |
+          ls -la proto
 
       - name: Generate protos
         working-directory: sdk
