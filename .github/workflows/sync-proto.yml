@@ -51,13 +51,13 @@ jobs:
       - name: Check if there are changes
         working-directory: sdk
         run: |
-          git diff --exit-code gen || exit 0
+          git diff --exit-code src/gen || exit 0
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
           path: sdk # Relative to GITHUB_WORKSPACE
-          add-paths: gen
+          add-paths: src/gen
           token: ${{ secrets.SYNC_TOKEN }}
           base: main
           head: ${{ env.BRANCH }}
