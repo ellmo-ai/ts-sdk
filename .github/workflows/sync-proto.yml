@@ -46,7 +46,7 @@ jobs:
 
       - name: Generate protos
         working-directory: sdk
-        run: buf generate proto
+        run: buf generate
 
       - name: Check if there are changes
         working-directory: sdk
