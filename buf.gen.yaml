@@ -3,8 +3,9 @@ version: v2
 plugins:
   - local: ./node_modules/@protobuf-ts/plugin/bin/protoc-gen-ts
     out: src/gen
-    opt: 
+    opt:
       - generate_dependencies
       - long_type_string
 inputs:
   - directory: proto
+
