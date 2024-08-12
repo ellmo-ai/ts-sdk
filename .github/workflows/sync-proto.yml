@@ -25,11 +25,6 @@ jobs:
           token: ${{ secrets.SYNC_TOKEN }}
           path: sdk
 
-      - name: List sdk directory contents
-        run: |
-          ls -la sdk
-          ls -la backend
-
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -49,11 +44,6 @@ jobs:
           mkdir -p sdk/proto/
           cp -a backend/proto/src/definitions/* sdk/proto/
 
-      - name: List sdk directory contents
-        working-directory: sdk
-        run: |
-          ls -la proto
-
       - name: Generate protos
         working-directory: sdk
         run: buf generate
@@ -61,13 +51,13 @@ jobs:
       - name: Check if there are changes
         working-directory: sdk
         run: |
-          git diff --exit-code src || exit 0
+          git diff --exit-code gen || exit 0
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
           path: sdk # Relative to GITHUB_WORKSPACE
-          add-paths: src
+          add-paths: gen
           token: ${{ secrets.SYNC_TOKEN }}
           base: main
           head: ${{ env.BRANCH }}
