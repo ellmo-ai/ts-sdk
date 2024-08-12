@@ -50,7 +50,7 @@ jobs:
           cp -a backend/proto/src/definitions/ sdk/proto/
 
       - name: List sdk directory contents
-        working-direcotry: sdk
+        working-directory: sdk
         run: |
           ls -la proto
 
