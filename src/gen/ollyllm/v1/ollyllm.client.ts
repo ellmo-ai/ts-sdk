@@ -4,10 +4,10 @@
 import type { RpcTransport } from "@protobuf-ts/runtime-rpc";
 import type { ServiceInfo } from "@protobuf-ts/runtime-rpc";
 import { OllyllmService } from "./ollyllm";
-import type { SpanCreationRequest } from "./span_creation";
+import type { ReportSpanRequest } from "./span";
 import { stackIntercept } from "@protobuf-ts/runtime-rpc";
 import type { Empty } from "../../google/protobuf/empty";
-import type { TestExecutionRequest } from "./test_execution";
+import type { TestExecutionRequest } from "./test";
 import type { UnaryCall } from "@protobuf-ts/runtime-rpc";
 import type { RpcOptions } from "@protobuf-ts/runtime-rpc";
 /**
@@ -19,9 +19,9 @@ export interface IOllyllmServiceClient {
      */
     queueTest(input: TestExecutionRequest, options?: RpcOptions): UnaryCall<TestExecutionRequest, Empty>;
     /**
-     * @generated from protobuf rpc: QueueSpan(ollyllm.v1.SpanCreationRequest) returns (google.protobuf.Empty);
+     * @generated from protobuf rpc: ReportSpan(ollyllm.v1.ReportSpanRequest) returns (google.protobuf.Empty);
      */
-    queueSpan(input: SpanCreationRequest, options?: RpcOptions): UnaryCall<SpanCreationRequest, Empty>;
+    reportSpan(input: ReportSpanRequest, options?: RpcOptions): UnaryCall<ReportSpanRequest, Empty>;
 }
 /**
  * @generated from protobuf service ollyllm.v1.OllyllmService
@@ -40,10 +40,10 @@ export class OllyllmServiceClient implements IOllyllmServiceClient, ServiceInfo 
         return stackIntercept<TestExecutionRequest, Empty>("unary", this._transport, method, opt, input);
     }
     /**
-     * @generated from protobuf rpc: QueueSpan(ollyllm.v1.SpanCreationRequest) returns (google.protobuf.Empty);
+     * @generated from protobuf rpc: ReportSpan(ollyllm.v1.ReportSpanRequest) returns (google.protobuf.Empty);
      */
-    queueSpan(input: SpanCreationRequest, options?: RpcOptions): UnaryCall<SpanCreationRequest, Empty> {
+    reportSpan(input: ReportSpanRequest, options?: RpcOptions): UnaryCall<ReportSpanRequest, Empty> {
         const method = this.methods[1], opt = this._transport.mergeOptions(options);
-        return stackIntercept<SpanCreationRequest, Empty>("unary", this._transport, method, opt, input);
+        return stackIntercept<ReportSpanRequest, Empty>("unary", this._transport, method, opt, input);
     }
 }
