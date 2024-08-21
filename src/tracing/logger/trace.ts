@@ -3,20 +3,22 @@ import { Log, ISpan } from "./types";
 
 export class Span implements ISpan {
     public id: string;
+    public traceId: string;
     public startTime: number;
     public endTime: number | null = null;
     public logs: Log[] = [];
     public childSpans: Span[] = [];
 
     public constructor(
-        public operationName: string, public parentSpanId?: string
+        public operationName: string, traceId?: string, public parentSpanId?: string,
     ) {
         this.id = uuidv4();
+        this.traceId = traceId || uuidv4();
         this.startTime = Date.now();
     }
 
     public startSpan(name: string): Span {
-        const span = new Span(this.id, name);
+        const span = new Span(name, this.traceId, this.id);
         this.childSpans.push(span);
         return span;
     }

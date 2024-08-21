@@ -14,10 +14,3 @@ export function omit<T extends object, K extends keyof T>(obj: T, keys: readonly
     // Return the resulting object
     return result;
 }
-
-// Example usage:
-const originalObject = { a: 1, b: 2, c: 3 };
-const keysToOmit = ['b', 'c'] as const;
-const newObject = omit(originalObject, keysToOmit);
-
-console.log(newObject); // Output: { a: 1 }

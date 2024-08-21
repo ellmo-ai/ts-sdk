@@ -5,7 +5,8 @@
             "@ollyllm/*": [
                 "../src/*"
             ]
-        }
+        },
+        "target": "ES2017"
     },
     "extends": "../tsconfig.json",
 }
