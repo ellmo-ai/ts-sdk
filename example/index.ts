@@ -4,7 +4,7 @@ import { OpenAI } from "openai";
 
 const logger = init({
     apiKey: '1234',
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'localhost:50051',
     debug: false,
 });
 
