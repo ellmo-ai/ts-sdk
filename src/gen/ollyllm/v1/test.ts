@@ -22,9 +22,9 @@ export interface VersionedTest {
      */
     name: string; // ID of test
     /**
-     * @generated from protobuf field: int32 version = 2;
+     * @generated from protobuf field: string version = 2;
      */
-    version: number; // Version of test
+    version: string; // SemVer of test
 }
 /**
  *  TestExecutionRequest represents a request to execute a versioned test.
@@ -54,13 +54,13 @@ class VersionedTest$Type extends MessageType<VersionedTest> {
     constructor() {
         super("ollyllm.v1.VersionedTest", [
             { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "version", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
+            { no: 2, name: "version", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<VersionedTest>): VersionedTest {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.name = "";
-        message.version = 0;
+        message.version = "";
         if (value !== undefined)
             reflectionMergePartial<VersionedTest>(this, message, value);
         return message;
@@ -73,8 +73,8 @@ class VersionedTest$Type extends MessageType<VersionedTest> {
                 case /* string name */ 1:
                     message.name = reader.string();
                     break;
-                case /* int32 version */ 2:
-                    message.version = reader.int32();
+                case /* string version */ 2:
+                    message.version = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -91,9 +91,9 @@ class VersionedTest$Type extends MessageType<VersionedTest> {
         /* string name = 1; */
         if (message.name !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.name);
-        /* int32 version = 2; */
-        if (message.version !== 0)
-            writer.tag(2, WireType.Varint).int32(message.version);
+        /* string version = 2; */
+        if (message.version !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.version);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
