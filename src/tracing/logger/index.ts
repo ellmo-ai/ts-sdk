@@ -26,25 +26,64 @@ export function init(opts: LoggerOptions): Logger {
 
 
 export namespace Tracing {
-    type DecoratorFn = (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) => void;
+    type DecoratorFn<T = any> = (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<T>) => void;
 
     /** Retrieve the current span if any */
     export function currentSpan(): Span | undefined {
         return logger?.currentSpan();
     }
 
-    export function traceWithTests<T>(name: string, tests: Test<T>[], callback: () => T): T {
-        if (!logger) {
-            return callback();
+    /** 
+     * Trace a function call and run tests on the result
+     * 
+     * @template T is the type of the result (and the input of the tests)
+     * @param tests The tests to run on the result
+     * @param callback The function to trace
+     * @returns The result of the function
+     */
+    export function traceWithTests<T extends (...args: any[]) => any, U extends ReturnType<T>>(name: string, tests: Test<U>[]): DecoratorFn<T>;
+    export function traceWithTests<T extends (...args: any[]) => any, U extends ReturnType<T>>(tests: Test<U>[]): DecoratorFn<T>;
+    export function traceWithTests<T extends (...args: any[]) => any, U extends ReturnType<T>>(name: string, tests: Test<U>[], callback: T): U;
+    export function traceWithTests<T extends (...args: any[]) => any, U extends ReturnType<T>>(tests: Test<U>[], callback: T): U;
+    export function traceWithTests<T extends (...args: any[]) => any, U extends ReturnType<T>>(nameOrTests: string | Test<U>[], testsOrCallback?: Test<U>[] | T, callback?: T): U | DecoratorFn<T> {
+        let name: string | undefined;
+        let tests: Test<U>[];
+        let actualCallback: T | undefined;
+
+        if (typeof nameOrTests === 'string') {
+            name = nameOrTests;
+            tests = testsOrCallback as Test<U>[];
+            actualCallback = callback;
+        } else {
+            tests = nameOrTests;
+            actualCallback = testsOrCallback as T;
         }
 
-        const result = trace(name, callback);
+        if (actualCallback) {
+            const result = actualCallback();
+            for (const test of tests) {
+                test.func(result);
+            }
+            return result;
+        } else {
+            // Handle decorator usage
+            return function (target: any, propertyKey: string, descriptor: TypedPropertyDescriptor<T>): void {
+                const originalMethod = descriptor.value as T;
+                descriptor.value = function (...args: unknown[]) {
+                    if (!logger) {
+                        return originalMethod.bind(target, ...args)();
+                    }
 
-        tests.forEach(test => {
-            // TODO: send the tests to the backend
-        });
+                    const nameToUse = `${target.constructor.name}.${propertyKey}`;
+                    const result = logger.trace(nameToUse, originalMethod.bind(target, ...args));
 
-        return result;
+                    for (const test of tests) {
+                        test.func(result);
+                    }
+                    return result;
+                } as T;
+            };
+        }
     }
 
     /** Trace a function call */

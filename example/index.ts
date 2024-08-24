@@ -1,6 +1,7 @@
 import { init, Tracing } from "../src/tracing/logger";
 import { wrappedOpenAI } from "../src/tracing/wrap/openai";
 import { OpenAI } from "openai";
+import { no420, noUUID } from "./tests/simple/noUUID.olly";
 
 const logger = init({
     apiKey: '1234',
@@ -23,13 +24,20 @@ export class Example {
     public async exampleMethod2(): Promise<void> {
         console.log("Example method2 called");
     }
+
+    @Tracing.traceWithTests([no420])
+    public testedMethod(): number {
+        Tracing.traceWithTests('this is a test path', [noUUID], (result: number) => {
+            return '0a0a0a0a-0a0a-0a0a-0a0a-0a0a0a0a0a';
+        });
+
+        return 420;
+    }
 }
 
 const example = new Example();
-console.log('Calling exampleMethod');
-example.exampleMethod().then(() => {
-    console.log('exampleMethod resolved');
-});
+console.log('Calling tested method');
+example.testedMethod();
 
 const openai = new OpenAI({
     apiKey: '1234',
