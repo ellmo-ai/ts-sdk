@@ -27,7 +27,7 @@ export class Example {
 
     @Tracing.traceWithTests([no420])
     public testedMethod(): number {
-        Tracing.traceWithTests('this is a test path', [noUUID], (result: number) => {
+        Tracing.traceWithTests('testedMethod-inner', [noUUID], () => {
             return '0a0a0a0a-0a0a-0a0a-0a0a-0a0a0a0a0a';
         });
 
