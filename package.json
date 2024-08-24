@@ -16,6 +16,7 @@
     "@protobuf-ts/runtime": "^2.9.4",
     "@protobuf-ts/runtime-rpc": "^2.9.4",
     "axios": "^1.7.2",
+    "chalk": "^4.1.2",
     "commander": "^12.1.0",
     "openai": "^4.51.0",
     "typescript": "^5.4.5",

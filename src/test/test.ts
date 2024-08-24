@@ -1,3 +1,4 @@
+/** A test definition. */
 export class Test<T> {
     public constructor(
         { id, version, func }: { id: string, version: string, func: (input: T) => string | boolean | number }

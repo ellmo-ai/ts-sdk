@@ -1,6 +1,4 @@
 {
     "testsPath": "./tests",
-    "excludeDependencies": [
-        "@foo/*"
-    ]
+    "includeDependencies": []
 }
