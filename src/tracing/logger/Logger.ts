@@ -6,6 +6,8 @@ import { GrpcTransport } from '@protobuf-ts/grpc-transport';
 import { ChannelCredentials } from '@grpc/grpc-js';
 import { ReportSpanRequest, Span as SpanProto } from '../../gen/ollyllm/v1/span';
 import { Timestamp } from '../../gen/google/protobuf/timestamp';
+import { Test } from '../../test';
+import { TestExecutionRequest } from '../../gen/ollyllm/v1/test';
 
 class State {
     public _currentSpan: AsyncLocalStorage<Span | undefined> = new AsyncLocalStorage<Span | undefined>();
@@ -13,10 +15,13 @@ class State {
 }
 
 export type LoggerOptions = {
+    /** The API key to use for the logger */
     apiKey: string;
+    /** The base URL of the OllyLLM server */
     baseUrl: string;
+    /** Whether to enable debug mode */
     debug?: boolean;
-}
+};
 
 const FLUSH_INTERVAL_MS = 5 * 1000; // 5 seconds
 
@@ -45,11 +50,51 @@ export class Logger {
     }
 
     /** Get the singleton instance of the Logger */
-    public static getInstance(opts: LoggerOptions): Logger {
+    public static getInstance(): Logger {
+        if (!Logger.instance) {
+            throw new Error('Logger not initialized');
+        }
+        return Logger.instance;
+    }
+
+    /** Initialize the Logger with the given options */
+    public static init(opts: LoggerOptions): Logger {
         if (!Logger.instance) {
             Logger.instance = new Logger(opts);
         }
         return Logger.instance;
+    }
+
+    /** 
+     * Queue a test execution request 
+     * 
+     * @template T is the type of the input
+     * @param test The test to execute
+     * @param input The input to the test
+    */
+    public async requestTestExecution<T>(spanId: string | undefined, test: Test<T>, input: T) {
+        if (this._debug) {
+            const result = test.func(input);
+            console.log(`Test ${test.id} returned ${result}`);
+            return;
+        }
+
+        const payload: TestExecutionRequest = {
+            spanId,
+            versionedTest: {
+                name: test.id,
+                version: test.version,
+            },
+            // Encode input as JSON string
+            testInput: [Uint8Array.from(Buffer.from(JSON.stringify(input)))],
+            requestTimestamp: Timestamp.fromDate(new Date()),
+        };
+
+        try {
+            this.client.queueTest(payload);
+        } catch (error) {
+            console.error('Failed to queue test execution', error);
+        }
     }
 
     /** Start a trace with the given name */

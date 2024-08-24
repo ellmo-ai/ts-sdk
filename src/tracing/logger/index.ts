@@ -6,8 +6,6 @@ let logger: Logger | undefined;
 
 /** Initialize the logger */
 export function init(opts: LoggerOptions): Logger {
-    const isProduction = process.env.NODE_ENV === 'production';
-
     if (!opts.apiKey) {
         throw new Error('OllyLLM: apiKey is required');
     }
@@ -15,7 +13,7 @@ export function init(opts: LoggerOptions): Logger {
         throw new Error('OllyLLM: baseUrl is required');
     }
 
-    logger = Logger.getInstance({
+    logger = Logger.init({
         apiKey: opts.apiKey,
         baseUrl: opts.baseUrl,
         debug: opts.debug,
@@ -50,6 +48,9 @@ export namespace Tracing {
         let tests: Test<U>[];
         let actualCallback: T | undefined;
 
+        // The created child span from the resulting traced function
+        let childSpan: Span | undefined;
+
         if (typeof nameOrTests === 'string') {
             name = nameOrTests;
             tests = testsOrCallback as Test<U>[];
@@ -60,10 +61,21 @@ export namespace Tracing {
         }
 
         if (actualCallback) {
-            const result = actualCallback();
-            for (const test of tests) {
-                test.func(result);
+            if (!logger) {
+                return actualCallback();
             }
+
+
+
+            const result = logger.trace(name ?? "Anonymous", () => {
+                childSpan = currentSpan();
+                return actualCallback();
+            });
+
+            for (const test of tests) {
+                logger.requestTestExecution(childSpan?.id, test, result);
+            }
+
             return result;
         } else {
             // Handle decorator usage
@@ -75,11 +87,15 @@ export namespace Tracing {
                     }
 
                     const nameToUse = `${target.constructor.name}.${propertyKey}`;
-                    const result = logger.trace(nameToUse, originalMethod.bind(target, ...args));
+                    const result = logger.trace(nameToUse, () => {
+                        childSpan = currentSpan();
+                        return originalMethod.bind(target, ...args)();
+                    });
 
                     for (const test of tests) {
-                        test.func(result);
+                        logger.requestTestExecution(childSpan?.id, test, result);
                     }
+
                     return result;
                 } as T;
             };
