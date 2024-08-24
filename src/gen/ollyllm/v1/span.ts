@@ -34,9 +34,9 @@ export interface Span {
      */
     operationName: string; // Name of the operation that span takes place in
     /**
-     * @generated from protobuf field: string parent_id = 5;
+     * @generated from protobuf field: optional string parent_id = 5;
      */
-    parentId: string; // ID of the span's parent, if exists
+    parentId?: string; // ID of the span's parent, if exists
     /**
      * @generated from protobuf field: string trace_id = 6;
      */
@@ -61,7 +61,7 @@ class Span$Type extends MessageType<Span> {
             { no: 2, name: "start_timestamp", kind: "message", T: () => Timestamp },
             { no: 3, name: "end_timestamp", kind: "message", T: () => Timestamp },
             { no: 4, name: "operation_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "parent_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "parent_id", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "trace_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
@@ -69,7 +69,6 @@ class Span$Type extends MessageType<Span> {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
         message.operationName = "";
-        message.parentId = "";
         message.traceId = "";
         if (value !== undefined)
             reflectionMergePartial<Span>(this, message, value);
@@ -92,7 +91,7 @@ class Span$Type extends MessageType<Span> {
                 case /* string operation_name */ 4:
                     message.operationName = reader.string();
                     break;
-                case /* string parent_id */ 5:
+                case /* optional string parent_id */ 5:
                     message.parentId = reader.string();
                     break;
                 case /* string trace_id */ 6:
@@ -122,8 +121,8 @@ class Span$Type extends MessageType<Span> {
         /* string operation_name = 4; */
         if (message.operationName !== "")
             writer.tag(4, WireType.LengthDelimited).string(message.operationName);
-        /* string parent_id = 5; */
-        if (message.parentId !== "")
+        /* optional string parent_id = 5; */
+        if (message.parentId !== undefined)
             writer.tag(5, WireType.LengthDelimited).string(message.parentId);
         /* string trace_id = 6; */
         if (message.traceId !== "")
