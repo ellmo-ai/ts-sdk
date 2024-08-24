@@ -1,13 +1,9 @@
-import { Test } from "@ollyllm/test";
-
-type Input = {
-    result: string;
-};
+import { Test } from "../../../src/test";
 
 export const noUUID = new Test({
     id: 'noUUID',
     version: '1.0.0',
-    func: ({ result }: Input) => {
+    func: (result: string) => {
         const regexp = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/ig
         const matches = Array.from(result.matchAll(regexp))
 
@@ -15,13 +11,10 @@ export const noUUID = new Test({
     }
 });
 
-export const noUUIDv2 = new Test({
-    id: 'noUUID',
+export const no420 = new Test({
+    id: 'no420',
     version: '2.0.0',
-    func: ({ result }: Input) => {
-        const regexp = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/ig
-        const matches = Array.from(result.matchAll(regexp))
-
-        return matches.length === 0;
+    func: (result: number) => {
+        return result !== 420;
     }
 });
