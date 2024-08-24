@@ -33,9 +33,9 @@ export interface VersionedTest {
  */
 export interface TestExecutionRequest {
     /**
-     * @generated from protobuf field: int32 session_id = 1;
+     * @generated from protobuf field: string span_id = 1;
      */
-    sessionId: number; // ID of trace session
+    spanId: string; // The associated Span ID for this test (if any).
     /**
      * @generated from protobuf field: ollyllm.v1.VersionedTest versioned_test = 2;
      */
@@ -108,7 +108,7 @@ export const VersionedTest = new VersionedTest$Type();
 class TestExecutionRequest$Type extends MessageType<TestExecutionRequest> {
     constructor() {
         super("ollyllm.v1.TestExecutionRequest", [
-            { no: 1, name: "session_id", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 1, name: "span_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "versioned_test", kind: "message", T: () => VersionedTest },
             { no: 3, name: "test_input", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 12 /*ScalarType.BYTES*/ },
             { no: 4, name: "request_timestamp", kind: "message", T: () => Timestamp }
@@ -116,7 +116,7 @@ class TestExecutionRequest$Type extends MessageType<TestExecutionRequest> {
     }
     create(value?: PartialMessage<TestExecutionRequest>): TestExecutionRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.sessionId = 0;
+        message.spanId = "";
         message.testInput = [];
         if (value !== undefined)
             reflectionMergePartial<TestExecutionRequest>(this, message, value);
@@ -127,8 +127,8 @@ class TestExecutionRequest$Type extends MessageType<TestExecutionRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* int32 session_id */ 1:
-                    message.sessionId = reader.int32();
+                case /* string span_id */ 1:
+                    message.spanId = reader.string();
                     break;
                 case /* ollyllm.v1.VersionedTest versioned_test */ 2:
                     message.versionedTest = VersionedTest.internalBinaryRead(reader, reader.uint32(), options, message.versionedTest);
@@ -151,9 +151,9 @@ class TestExecutionRequest$Type extends MessageType<TestExecutionRequest> {
         return message;
     }
     internalBinaryWrite(message: TestExecutionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* int32 session_id = 1; */
-        if (message.sessionId !== 0)
-            writer.tag(1, WireType.Varint).int32(message.sessionId);
+        /* string span_id = 1; */
+        if (message.spanId !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.spanId);
         /* ollyllm.v1.VersionedTest versioned_test = 2; */
         if (message.versionedTest)
             VersionedTest.internalBinaryWrite(message.versionedTest, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
