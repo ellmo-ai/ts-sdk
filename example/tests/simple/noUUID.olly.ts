@@ -1,4 +1,4 @@
-import { Test } from "../../../src/test";
+import { Test } from "@ollyllm/test";
 
 export const noUUID = new Test({
     id: 'noUUID',
@@ -13,7 +13,7 @@ export const noUUID = new Test({
 
 export const no420 = new Test({
     id: 'no420',
-    version: '2.0.0',
+    version: '2.0.1',
     func: (result: number) => {
         return result !== 420;
     }

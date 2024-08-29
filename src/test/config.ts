@@ -2,10 +2,16 @@ import path from "path";
 import fs from 'fs';
 
 export interface OllyLLMConfig {
-    /** Path to the tests directory */
-    testsPath: string;
-    /** Allowlist of dependencies to include in the bundle */
-    includeDependencies: string[];
+    /** Base URL for the API */
+    apiBaseUrl: string;
+    tests: {
+        /** Path to the tests directory */
+        testsPath: string;
+        /** Path to the package.json file */
+        packageJsonPath: string[],
+        /** Allowlist of dependencies to include in the bundle */
+        includeDependencies: string[];
+    },
 }
 
 /** 
@@ -14,7 +20,7 @@ export interface OllyLLMConfig {
  * @param startDir The starting directory for the search
  * @returns The config file path, if it is found
 */
-export function findConfigFile(startDir: string): string | null {
+export function findConfigFile(startDir: string): string {
     let currentDir = startDir;
     while (currentDir !== path.parse(currentDir).root) {
         const configPath = path.join(currentDir, 'ollyllm.config.json');
@@ -23,7 +29,8 @@ export function findConfigFile(startDir: string): string | null {
         }
         currentDir = path.dirname(currentDir);
     }
-    return null;
+
+    throw new Error('ollyllm.config.json not found in the current directory or any parent directory.');
 }
 
 /** 

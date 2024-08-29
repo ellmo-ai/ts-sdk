@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import ts from "typescript";
 import { OllyLLMConfig } from "./config";
+import { omit } from "../util/omit";
 
 type Test = {
     /** The test id */
@@ -17,14 +18,20 @@ type Test = {
 type TestId = string;
 
 export class TestManager {
-    private tests: Map<TestId, Test[]> = new Map();
+    private tests: Map<TestId, Omit<Test, 'id'>[]> = new Map();
 
     constructor(
         public config: OllyLLMConfig,
     ) { }
 
     private addTest(test: Test): void {
-        this.tests.set(test.id, [...(this.tests.get(test.id) || []), test]);
+        const testToRegister = omit(test, ['id']);
+
+        if (this.tests.has(test.id)) {
+            this.tests.get(test.id)?.push(testToRegister);
+        } else {
+            this.tests.set(test.id, [testToRegister]);
+        }
     }
 
     public processTests(): typeof this.tests {
@@ -55,7 +62,7 @@ export class TestManager {
             }
         }
 
-        processDir(this.config.testsPath);
+        processDir(this.config.tests.testsPath);
         return this.tests;
     }
 }
@@ -131,18 +138,20 @@ function determineInvalidImport(sourceFile: ts.SourceFile, config: OllyLLMConfig
         if (ts.isImportDeclaration(node)) {
             // FIXME: need to account for import path aliasing
 
-            const isLocalImport = (node.moduleSpecifier as ts.StringLiteral).text.startsWith('.');
+            const importName = (node.moduleSpecifier as ts.StringLiteral).text;
+
+            const isLocalImport = importName.startsWith('.');
 
             // If the import is not local, check if it's in the allowed dependencies
             if (!isLocalImport) {
-                hasInvalidImport ||= config.includeDependencies.includes(node.moduleSpecifier.getText());
+                hasInvalidImport ||= !config.tests.includeDependencies.includes(importName);
                 return;
             }
 
             // Check that the import path doesn't leave test directory
-            const importPath = (node.moduleSpecifier as ts.StringLiteral).text;
+            const importPath = importName;
             const resolvedPath = path.resolve(path.dirname(sourceFile.fileName), importPath);
-            if (!resolvedPath.startsWith(config.testsPath)) {
+            if (!resolvedPath.startsWith(config.tests.testsPath)) {
                 hasInvalidImport = true;
             }
         }
