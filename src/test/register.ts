@@ -11,7 +11,7 @@ import chalk from 'chalk';
 program
     .name('ollyllm-cli')
     .description('CLI to validate OllyLLM test files')
-    .action(() => {
+    .action(async () => {
         const currentDir = process.cwd();
         const configPath = findConfigFile(currentDir);
 
@@ -21,10 +21,17 @@ program
         }
 
         const config = readConfig(configPath);
-        config.testsPath = path.resolve(path.dirname(configPath), config.testsPath);
+        config.tests.testsPath = path.resolve(path.dirname(configPath), config.tests.testsPath);
+        config.tests.packageJsonPath = config.tests.packageJsonPath.map(p => path.resolve(path.dirname(configPath), p));
+        config.tests.includeDependencies.push(...['@ollyllm/test']);
 
-        if (!fs.existsSync(config.testsPath)) {
-            console.error(`Error: Tests directory ${config.testsPath} does not exist.`);
+        if (!fs.existsSync(config.tests.testsPath)) {
+            console.error(`Error: Tests directory ${config.tests.testsPath} does not exist.`);
+            process.exit(1);
+        }
+
+        if (!config.apiBaseUrl) {
+            console.error('Error: apiBaseUrl is not defined in the config file.');
             process.exit(1);
         }
 
@@ -39,7 +46,27 @@ program
             }
         }
 
-        console.log(chalk.green('\nAll test files validated successfully.'));
+        console.log('\nAll test files validated successfully. Registering tests...');
+
+        const result = await fetch(`${config.apiBaseUrl}/api/v1/test/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                tests: Object.fromEntries(tests),
+            })
+        });
+
+        const { message, error } = await result.json();
+
+        if (error) {
+            console.error(chalk.red('Error:'), message);
+            process.exit(1);
+        }
+
+        console.log(chalk.green('Success:'), message);
+
     });
 
 program.parse(process.argv);

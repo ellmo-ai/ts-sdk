@@ -1,4 +1,10 @@
 {
-    "testsPath": "./tests",
-    "includeDependencies": []
+    "apiBaseUrl": "http://localhost:3000",
+    "tests": {
+        "testsPath": "./tests",
+        "packageJsonPath": [
+            "./package.json"
+        ],
+        "includeDependencies": []
+    }
 }

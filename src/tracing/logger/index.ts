@@ -65,8 +65,6 @@ export namespace Tracing {
                 return actualCallback();
             }
 
-
-
             const result = logger.trace(name ?? "Anonymous", () => {
                 childSpan = currentSpan();
                 return actualCallback();

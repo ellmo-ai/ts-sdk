@@ -15,7 +15,7 @@
     "@protobuf-ts/plugin": "^2.9.4",
     "@protobuf-ts/runtime": "^2.9.4",
     "@protobuf-ts/runtime-rpc": "^2.9.4",
-    "axios": "^1.7.2",
+    "axios": "^1.7.5",
     "chalk": "^4.1.2",
     "commander": "^12.1.0",
     "openai": "^4.51.0",
@@ -24,10 +24,10 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@types/axios": "^0.14.0",
     "@types/node": "^20.12.12",
     "@types/uuid": "^9.0.8",
     "@types/yargs": "^17.0.32",
+    "tsconfig-paths": "^4.2.0",
     "vitest": "^1.6.0"
   }
 }

@@ -1,9 +1,10 @@
+import { OpenAI } from "openai";
+
 import { init, Tracing } from "../src/tracing/logger";
 import { wrappedOpenAI } from "../src/tracing/wrap/openai";
-import { OpenAI } from "openai";
 import { no420, noUUID } from "./tests/simple/noUUID.olly";
 
-const logger = init({
+const _logger = init({
     apiKey: '1234',
     baseUrl: 'localhost:50051',
     debug: false,
