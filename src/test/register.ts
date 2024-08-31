@@ -76,7 +76,7 @@ program
 
         console.log('\nAll test files validated successfully. Registering tests...');
 
-        const result: Response = await fetch(`${config.apiBaseUrl}/api/v1/test/register`, {
+        const result = await fetch(`${config.apiBaseUrl}/api/v1/test/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
