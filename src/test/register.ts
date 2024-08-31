@@ -3,10 +3,38 @@
 import fs from 'fs';
 import path from 'path';
 import { program } from 'commander';
+import chalk from 'chalk';
+import { create } from 'tar'
+import axios from 'axios';
 
 import { findConfigFile, readConfig } from './config';
 import { TestManager } from './process';
-import chalk from 'chalk';
+
+async function createTarball(testsPath: string): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const chunks: Buffer[] = [];
+        const tarStream = create({ gzip: true, cwd: testsPath }, ['.']);
+
+        tarStream.on('data', chunk => chunks.push(Buffer.from(chunk)));
+        tarStream.on('end', () => resolve(Buffer.concat(chunks)));
+        tarStream.on('error', reject);
+    });
+}
+
+async function uploadToS3(url: string, buffer: Buffer): Promise<void> {
+    try {
+        const response = await axios.put(url, buffer, {
+            headers: { 'Content-Type': 'application/gzip' },
+        });
+        console.log('File uploaded successfully:', response.status);
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Failed to upload to S3:', error.response?.statusText);
+        } else {
+            console.error('An unexpected error occurred:', error);
+        }
+    }
+}
 
 program
     .name('ollyllm-cli')
@@ -58,15 +86,20 @@ program
             })
         });
 
-        const { message, error } = await result.json();
+        const body = await result.json();
+        const { error, message, uploadUrl } = body;
 
-        if (error) {
-            console.error(chalk.red('Error:'), message);
+        if (error || !uploadUrl || result.status !== 200) {
+            console.error(chalk.red('\nError:'), error ?? message ?? 'An unexpected error occurred.');
             process.exit(1);
         }
 
-        console.log(chalk.green('Success:'), message);
-
+        try {
+            const buffer = await createTarball(config.tests.testsPath);
+            await uploadToS3(uploadUrl, buffer);
+        } catch (error) {
+            console.error('Error:', error);
+        }
     });
 
 program.parse(process.argv);

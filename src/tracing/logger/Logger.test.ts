@@ -12,7 +12,7 @@ describe('Logger', () => {
 
     beforeEach(() => {
         vi.useFakeTimers();
-        logger = Logger.getInstance(loggerOptions);
+        logger = Logger.init(loggerOptions);
         logger.flush = vi.fn().mockResolvedValue(null); // Mock flush to avoid real HTTP requests
     });
 
@@ -23,8 +23,8 @@ describe('Logger', () => {
     });
 
     it('should get a singleton instance of the Logger', () => {
-        const loggerInstance1 = Logger.getInstance(loggerOptions);
-        const loggerInstance2 = Logger.getInstance(loggerOptions);
+        const loggerInstance1 = Logger.init(loggerOptions);
+        const loggerInstance2 = Logger.init(loggerOptions);
 
         expect(loggerInstance1).toBe(loggerInstance2);
     });
@@ -88,7 +88,7 @@ describe('Logger', () => {
 
     it('should flush the traces buffer', async () => {
         loggerOptions.debug = false;
-        logger = Logger.getInstance(loggerOptions);
+        logger = Logger.init(loggerOptions);
         logger.startTrace('test-trace');
         logger.endTrace();
 
