@@ -58,9 +58,15 @@ export class Config {
         }
 
         this.opts = readConfig(configPath);
-        this.opts.tests.testsPath = path.resolve(path.dirname(configPath), this.opts.tests.testsPath);
-        this.opts.tests.packageJsonPath = path.resolve(path.dirname(configPath), this.opts.tests.packageJsonPath);
-        this.opts.tests.includeDependencies.push(...['@ollyllm/*']);
+        this.opts = {
+            ...this.opts,
+            tests: {
+                ...this.opts.tests,
+                testsPath: path.resolve(path.dirname(configPath), this.opts.tests.testsPath),
+                packageJsonPath: path.resolve(path.dirname(configPath), this.opts.tests.packageJsonPath),
+                includeDependencies: [...this.opts.tests.includeDependencies, '@ollyllm/*'],
+            },
+        }
 
         if (!fs.existsSync(this.opts.tests.testsPath)) {
             throw new Error(`Tests directory ${this.opts.tests.testsPath} does not exist.`);
