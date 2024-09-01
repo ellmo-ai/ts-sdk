@@ -8,7 +8,7 @@ export class Test<T> {
         this.func = (input: T) => {
             const result = func(input);
             console.log(`Test ${id} returned ${result}`);
-            return
+            return result;
         };
     }
 

@@ -1,8 +1,8 @@
 import path from "path";
 import fs from "fs";
 import ts from "typescript";
-import { OllyLLMConfig } from "./config";
 import { omit } from "../util/omit";
+import { Config } from "src/config";
 
 type Test = {
     /** The test id */
@@ -21,7 +21,7 @@ export class TestManager {
     private tests: Map<TestId, Omit<Test, 'id'>[]> = new Map();
 
     constructor(
-        public config: OllyLLMConfig,
+        public config: Config,
     ) { }
 
     private addTest(test: Test): void {
@@ -62,7 +62,7 @@ export class TestManager {
             }
         }
 
-        processDir(this.config.tests.testsPath);
+        processDir(this.config.opts.tests.testsPath);
         return this.tests;
     }
 }
@@ -116,7 +116,7 @@ function getIdAndVersion(initializer: ts.CallExpression): { id: string, version:
 }
 
 /** Validate a test file. */
-function validateFile(filePath: string, config: OllyLLMConfig) {
+function validateFile(filePath: string, config: Config) {
     const sourceFile = ts.createSourceFile(
         filePath,
         fs.readFileSync(filePath, 'utf-8'),
@@ -132,7 +132,7 @@ function validateFile(filePath: string, config: OllyLLMConfig) {
 }
 
 /** Determines if a test file has an invalid import */
-function determineInvalidImport(sourceFile: ts.SourceFile, config: OllyLLMConfig): boolean {
+function determineInvalidImport(sourceFile: ts.SourceFile, config: Config): boolean {
     let hasInvalidImport = false;
     ts.forEachChild(sourceFile, (node) => {
         if (ts.isImportDeclaration(node)) {
@@ -144,14 +144,14 @@ function determineInvalidImport(sourceFile: ts.SourceFile, config: OllyLLMConfig
 
             // If the import is not local, check if it's in the allowed dependencies
             if (!isLocalImport) {
-                hasInvalidImport ||= !config.tests.includeDependencies.includes(importName);
+                hasInvalidImport ||= !config.isDependencyAllowed(importName);
                 return;
             }
 
             // Check that the import path doesn't leave test directory
             const importPath = importName;
             const resolvedPath = path.resolve(path.dirname(sourceFile.fileName), importPath);
-            if (!resolvedPath.startsWith(config.tests.testsPath)) {
+            if (!resolvedPath.startsWith(config.opts.tests.testsPath)) {
                 hasInvalidImport = true;
             }
         }
