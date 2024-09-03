@@ -44,6 +44,7 @@ export class TestManager {
                     processDir(path.join(dirPath, file));
                 } else {
                     const filePath = path.join(dirPath, file);
+                    const relativePath = path.relative(this.config.opts.tests.testsPath, filePath);
 
                     validateFile(filePath, this.config);
 
@@ -56,7 +57,7 @@ export class TestManager {
 
                     const tests = getTestsInFile(sourceFile);
                     tests.forEach(test => {
-                        this.addTest({ ...test, filePath });
+                        this.addTest({ ...test, filePath: relativePath });
                     });
                 }
             }
@@ -84,7 +85,7 @@ function getTestsInFile(sourceFile: ts.SourceFile) {
                 return;
             }
 
-            const name = initializer.expression.getText();
+            const name = (initializer.expression as ts.Identifier).text;
             if (name !== 'Test') {
                 return;
             }
@@ -96,7 +97,7 @@ function getTestsInFile(sourceFile: ts.SourceFile) {
             }
 
             const { id, version } = getIdAndVersion(initializer);
-            const exportName = declaration.name.getText();
+            const exportName = (declaration.name as ts.Identifier).text;
             tests.push({ id, version, exportName: exportName });
         }
     });
@@ -112,7 +113,10 @@ function getIdAndVersion(initializer: ts.CallExpression): { id: string, version:
     const idProp = options.properties.find((prop) => prop.name?.getText() === 'id') as ts.PropertyAssignment;
     const versionProp = options.properties.find((prop) => prop.name?.getText() === 'version') as ts.PropertyAssignment;
 
-    return { id: idProp.initializer.getText(), version: (versionProp.initializer as ts.StringLiteral).text };
+    const id = (idProp.initializer as ts.StringLiteral).text;
+    const version = (versionProp.initializer as ts.StringLiteral).text;
+
+    return { id, version };
 }
 
 /** Validate a test file. */
