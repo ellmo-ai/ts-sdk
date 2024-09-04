@@ -14,7 +14,7 @@
     "skipLibCheck": true, /* Skip type checking all .d.ts files. */
     "baseUrl": ".",
     "rootDir": "./src",
-    "outDir": "./",
+    "outDir": "./dist",
   },
   "include": [
     "src/**/*",
