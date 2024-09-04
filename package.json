@@ -1,6 +1,6 @@
 {
   "name": "@ollyllm/ts-sdk",
-  "version": "0.0.10",
+  "version": "0.0.14",
   "description": "",
   "main": "index.js",
   "scripts": {

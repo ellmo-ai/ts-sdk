@@ -32,8 +32,19 @@ const program = new Command()
         let inputToUse: any;
         try {
             if (input.trim().startsWith('{') || input.trim().startsWith('[')) {
+                // Handle JSON objects and arrays
                 inputToUse = JSON.parse(input);
+            } else if (input.trim() === 'null') {
+                // Handle null
+                inputToUse = null;
+            } else if (input.trim() === 'true' || input.trim() === 'false') {
+                // Handle boolean
+                inputToUse = input.trim() === 'true';
+            } else if (!isNaN(Number(input.trim()))) {
+                // Handle number
+                inputToUse = Number(input.trim());
             } else {
+                // Handle string
                 inputToUse = input;
             }
         } catch (error) {

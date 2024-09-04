@@ -6,8 +6,7 @@ export class Test<T> {
         this.id = id;
         this.version = version;
         this.func = (input: T) => {
-            const result = func(input);
-            console.log(`Test ${id} returned ${result}`);
+            const result = func(JSON.parse(JSON.stringify(input)));
             return result;
         };
     }

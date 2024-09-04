@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@ollyllm/ts-sdk':
-    specifier: ^0.0.10
-    version: 0.0.10
+    specifier: ^0.0.13
+    version: 0.0.13
   typescript:
     specifier: ^5.4.5
     version: 5.5.2
@@ -49,8 +49,8 @@ packages:
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
     dev: false
 
-  /@ollyllm/ts-sdk@0.0.10:
-    resolution: {integrity: sha512-Bslq67XyLU4Vvr1UGU5ohAPp/HSfXyGKMXeEIA4xB5JGNRtnRISQoKRhjbsfXy1O/0QAjYr4NpynEBXsO4CcsA==}
+  /@ollyllm/ts-sdk@0.0.13:
+    resolution: {integrity: sha512-3Y6U1ROJtup46p9u/aTHb1Qs5m/2+FsGJehYxwZp/KMG5tY8Ki9d01I450QnRsAODvYylhgEtrLDKbjvGGw1fQ==}
     hasBin: true
     dependencies:
       '@grpc/grpc-js': 1.11.1
@@ -168,7 +168,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 18.19.49
+      '@types/node': 22.5.3
       form-data: 4.0.0
     dev: false
 
