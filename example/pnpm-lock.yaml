@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@ollyllm/ts-sdk':
+    specifier: link:..
+    version: link:..
   typescript:
     specifier: ^5.4.5
     version: 5.5.2

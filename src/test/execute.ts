@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S ts-node || node
 
 import { Command } from 'commander';
 import { Test } from '.';

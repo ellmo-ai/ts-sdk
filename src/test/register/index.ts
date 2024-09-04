@@ -1,10 +1,10 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S ts-node || node
 
 import { program } from 'commander';
 import chalk from 'chalk';
 import axios from 'axios';
 import archiver from 'archiver';
-import { TestManager } from '../process';
+import { TestManager } from './process';
 import { processPackageJson } from './deps';
 import { Config } from '../../config';
 
