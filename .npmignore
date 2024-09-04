@@ -1,0 +1,8 @@
+# Include everything
+!*
+
+# Exclude the following
+node_modules
+src
+tsconfig.json
+.gitignore

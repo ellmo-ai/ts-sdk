@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S ts-node || node
 
 import { Command } from 'commander';
 import { Test } from '.';
@@ -31,7 +31,22 @@ const program = new Command()
 
         let inputToUse: any;
         try {
-            inputToUse = JSON.parse(input);
+            if (input.trim().startsWith('{') || input.trim().startsWith('[')) {
+                // Handle JSON objects and arrays
+                inputToUse = JSON.parse(input);
+            } else if (input.trim() === 'null') {
+                // Handle null
+                inputToUse = null;
+            } else if (input.trim() === 'true' || input.trim() === 'false') {
+                // Handle boolean
+                inputToUse = input.trim() === 'true';
+            } else if (!isNaN(Number(input.trim()))) {
+                // Handle number
+                inputToUse = Number(input.trim());
+            } else {
+                // Handle string
+                inputToUse = input;
+            }
         } catch (error) {
             console.error('Error parsing input:', error);
             process.exit(1);

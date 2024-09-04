@@ -1,4 +1,4 @@
-import { Test } from "@ollyllm/test";
+import { Test } from "@ollyllm/ts-sdk/dist/test";
 
 export const noUUID = new Test({
     id: 'noUUID',

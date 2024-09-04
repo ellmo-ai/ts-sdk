@@ -1,14 +1,20 @@
 {
-  "name": "sdk",
-  "version": "1.0.0",
+  "name": "@ollyllm/ts-sdk",
+  "version": "0.0.14",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "prepublishOnly": "pnpm build",
+    "build": "tsc && chmod +x dist/test/register/index.js && chmod +x dist/test/execute.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "bin": "./cli.js",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@grpc/grpc-js": "^1.11.1",
     "@protobuf-ts/grpc-transport": "^2.9.4",

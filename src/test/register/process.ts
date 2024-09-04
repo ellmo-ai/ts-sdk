@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import ts from "typescript";
-import { omit } from "../util/omit";
+import { omit } from "../../util/omit";
 import { Config } from "src/config";
 
 type Test = {
