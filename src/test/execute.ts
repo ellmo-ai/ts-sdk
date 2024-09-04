@@ -31,7 +31,11 @@ const program = new Command()
 
         let inputToUse: any;
         try {
-            inputToUse = JSON.parse(input);
+            if (input.trim().startsWith('{') || input.trim().startsWith('[')) {
+                inputToUse = JSON.parse(input);
+            } else {
+                inputToUse = input;
+            }
         } catch (error) {
             console.error('Error parsing input:', error);
             process.exit(1);
