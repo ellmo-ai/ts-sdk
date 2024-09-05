@@ -22,7 +22,7 @@ export class ParseInteger extends Prompt<string, number> {
                 case "three":
                     return 3;
                 default:
-                    return 0;
+                    throw new Error("Invalid input");
             }
         }
     }

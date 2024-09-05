@@ -45,13 +45,20 @@ export class Eval<T, U extends string | boolean | number> {
     public run: EvalRunFunction<T, U>;
     public scoring: EvalScoringFunction<T, U>;
 
-    public async runEval(): Promise<void> {
+    public async runEval() {
         const data = await this.data();
 
-        await Promise.all(data.map(async ({ input, expected }) => {
-            const output = await this.run(input);
-            const score = await this.scoring(input, expected, output);
-            console.log(`Score: ${score}`);
+        return await Promise.all(data.map(async ({ input, expected }) => {
+            try {
+                const output = await this.run(input);
+                return {
+                    result: await this.scoring(input, expected, output),
+                };
+            } catch (error) {
+                return {
+                    error: true,
+                };
+            }
         }));
     }
 }

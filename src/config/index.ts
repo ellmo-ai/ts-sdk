@@ -1,6 +1,9 @@
 import path from "path";
 import fs from 'fs';
 import { Trie } from "./trie";
+import { GrpcTransport } from "@protobuf-ts/grpc-transport";
+import { ChannelCredentials } from "@grpc/grpc-js";
+import { OllyllmServiceClient } from "../gen/ollyllm/v1/ollyllm.client";
 
 export interface OllyLLMConfig {
     /** Base URL for the API */
@@ -52,13 +55,11 @@ export function readConfig(configPath: string): OllyLLMConfig {
 }
 
 export class Config {
+    private configPath: string;
+
     public opts: OllyLLMConfig;
     private allowedDeps: Trie;
-
-    private configPath: string;
-    public resolveRelativePath(relativePath: string): string {
-        return path.resolve(path.dirname(this.configPath), relativePath);
-    }
+    public rpcClient: OllyllmServiceClient;
 
     constructor() {
         const currentDir = process.cwd();
@@ -93,14 +94,30 @@ export class Config {
         }
 
         this.allowedDeps = Trie.buildTrie(this.opts.tests.includeDependencies);
+        const transport = new GrpcTransport({
+            host: this.opts.apiBaseUrl,
+            channelCredentials: ChannelCredentials.createInsecure(),
+        });
+        this.rpcClient = new OllyllmServiceClient(transport);
     }
 
     public isDependencyAllowed(dependency: string): boolean {
         return this.allowedDeps.search(dependency);
     }
 
-    public get evalsPath(): string {
-        return this.opts.prompts.evalsPath ?? this.opts.prompts.promptsPath;
+    public getPath(name: "tests" | "prompts" | "evals"): string {
+        switch (name) {
+            case "tests":
+                return this.opts.tests.testsPath;
+            case "prompts":
+                return this.opts.prompts.promptsPath;
+            case "evals":
+                return this.opts.prompts.evalsPath ?? this.opts.prompts.promptsPath;
+        }
+    }
+
+    public resolveRelativePath(relativePath: string): string {
+        return path.resolve(path.dirname(this.configPath), relativePath);
     }
 }
 

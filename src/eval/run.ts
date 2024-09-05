@@ -47,10 +47,11 @@ const program = new Command()
                 process.exit(1);
             }
 
+            let scores: any;
             try {
-                ev.runEval();
+                scores = await ev.runEval();
             } catch (error) {
-                console.error('Error executing function:', error);
+                console.error('Error executing eval:', error);
                 process.exit(1);
             }
         }
@@ -92,13 +93,13 @@ function getPromptClasses(config: Config, promptPath: string): ts.ClassDeclarati
 }
 
 function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { file: string, exportName: string }[] {
-    const evalFiles = getAllFilesMatchingPattern(config.evalsPath, /\.eval.ts$/);
+    const evalFiles = getAllFilesMatchingPattern(config.getPath("evals"), /\.eval.ts$/);
 
     // Get the list of eval files that use the classes with the @HasEval decorator
     const evalFilesToRun = evalFiles.map(evalFile => {
         const evalSourceFile = ts.createSourceFile(
-            path.resolve(config.evalsPath, evalFile),
-            fs.readFileSync(path.resolve(config.evalsPath, evalFile), 'utf-8'),
+            path.resolve(config.getPath("evals"), evalFile),
+            fs.readFileSync(path.resolve(config.getPath("evals"), evalFile), 'utf-8'),
             ts.ScriptTarget.Latest,
             true
         );

@@ -18,6 +18,10 @@ export const ParseIntegerEval = new Eval({
             input: "THREE.FIVE",
             expected: 3.5,
         },
+        {
+            input: "FIVE",
+            expected: 5,
+        },
     ]),
     run: async (input: string) => {
         const prompt = new ParseInteger();
