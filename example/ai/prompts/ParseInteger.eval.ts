@@ -23,7 +23,7 @@ export const ParseIntegerEval = new Eval({
         const prompt = new ParseInteger();
         return await prompt.execute(input);
     },
-    scoring: async (input: string, expected: number, output: number) => {
+    scoring: async (_input: string, expected: number, output: number) => {
         return output === expected;
     }
 });

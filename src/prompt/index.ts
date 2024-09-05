@@ -17,8 +17,9 @@ export abstract class Prompt<T, U> {
     protected abstract prepare(): Promise<(input: T) => Promise<U>>;
 
     public async execute(input: T): Promise<U> {
-        const prompt = this.systemPrompt;
-        const model = this.model;
+        // const prompt = this.systemPrompt;
+        // const model = this.model;
+        // TODO: maybe we can just invoke the OpenAI sdk here
 
         const prepare = await this.prepare();
         return prepare(input);
