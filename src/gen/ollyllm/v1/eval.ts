@@ -26,39 +26,17 @@ export interface VersionedEval {
     version: string; // SemVer of test
 }
 /**
- * @generated from protobuf message ollyllm.v1.SingleEvalResult
+ * @generated from protobuf message ollyllm.v1.EvalScore
  */
-export interface SingleEvalResult {
+export interface EvalScore {
     /**
-     * @generated from protobuf oneof: SingleEvalResultOneOf
+     * @generated from protobuf field: string eval_hash = 1;
      */
-    singleEvalResultOneOf: {
-        oneofKind: "error";
-        /**
-         * @generated from protobuf field: bool error = 1;
-         */
-        error: boolean; // Whether the eval errored
-    } | {
-        oneofKind: "score";
-        /**
-         * @generated from protobuf field: int64 score = 2;
-         */
-        score: string; // Eval score
-    } | {
-        oneofKind: "percentage";
-        /**
-         * @generated from protobuf field: float percentage = 3;
-         */
-        percentage: number; // Eval percentage
-    } | {
-        oneofKind: "result";
-        /**
-         * @generated from protobuf field: bool result = 4;
-         */
-        result: boolean; // Eval result
-    } | {
-        oneofKind: undefined;
-    };
+    evalHash: string; // Hash of the eval input/expected
+    /**
+     * @generated from protobuf field: float score = 2;
+     */
+    score: number; // Score of the eval
 }
 /**
  *  RecordEvalRequest represents a request to record an eval run.
@@ -71,9 +49,9 @@ export interface RecordEvalRequest {
      */
     versionedEval?: VersionedEval; // Unique eval
     /**
-     * @generated from protobuf field: repeated ollyllm.v1.SingleEvalResult eval_results = 2;
+     * @generated from protobuf field: repeated ollyllm.v1.EvalScore eval_results = 2;
      */
-    evalResults: SingleEvalResult[]; // List of eval results
+    evalResults: EvalScore[]; // List of eval results
 }
 /**
  * @generated from protobuf message ollyllm.v1.RecordEvalResponse
@@ -84,9 +62,13 @@ export interface RecordEvalResponse {
      */
     result: EvalResult;
     /**
-     * @generated from protobuf field: repeated ollyllm.v1.SingleEvalResult previous_eval_results = 2;
+     * @generated from protobuf field: repeated ollyllm.v1.EvalScore previous_eval_scores = 2;
      */
-    previousEvalResults: SingleEvalResult[];
+    previousEvalScores: EvalScore[];
+    /**
+     * @generated from protobuf field: string message = 3;
+     */
+    message: string;
 }
 /**
  * @generated from protobuf enum ollyllm.v1.EvalResult
@@ -161,50 +143,31 @@ class VersionedEval$Type extends MessageType<VersionedEval> {
  */
 export const VersionedEval = new VersionedEval$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class SingleEvalResult$Type extends MessageType<SingleEvalResult> {
+class EvalScore$Type extends MessageType<EvalScore> {
     constructor() {
-        super("ollyllm.v1.SingleEvalResult", [
-            { no: 1, name: "error", kind: "scalar", oneof: "singleEvalResultOneOf", T: 8 /*ScalarType.BOOL*/ },
-            { no: 2, name: "score", kind: "scalar", oneof: "singleEvalResultOneOf", T: 3 /*ScalarType.INT64*/ },
-            { no: 3, name: "percentage", kind: "scalar", oneof: "singleEvalResultOneOf", T: 2 /*ScalarType.FLOAT*/ },
-            { no: 4, name: "result", kind: "scalar", oneof: "singleEvalResultOneOf", T: 8 /*ScalarType.BOOL*/ }
+        super("ollyllm.v1.EvalScore", [
+            { no: 1, name: "eval_hash", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "score", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ }
         ]);
     }
-    create(value?: PartialMessage<SingleEvalResult>): SingleEvalResult {
+    create(value?: PartialMessage<EvalScore>): EvalScore {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.singleEvalResultOneOf = { oneofKind: undefined };
+        message.evalHash = "";
+        message.score = 0;
         if (value !== undefined)
-            reflectionMergePartial<SingleEvalResult>(this, message, value);
+            reflectionMergePartial<EvalScore>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SingleEvalResult): SingleEvalResult {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: EvalScore): EvalScore {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* bool error */ 1:
-                    message.singleEvalResultOneOf = {
-                        oneofKind: "error",
-                        error: reader.bool()
-                    };
+                case /* string eval_hash */ 1:
+                    message.evalHash = reader.string();
                     break;
-                case /* int64 score */ 2:
-                    message.singleEvalResultOneOf = {
-                        oneofKind: "score",
-                        score: reader.int64().toString()
-                    };
-                    break;
-                case /* float percentage */ 3:
-                    message.singleEvalResultOneOf = {
-                        oneofKind: "percentage",
-                        percentage: reader.float()
-                    };
-                    break;
-                case /* bool result */ 4:
-                    message.singleEvalResultOneOf = {
-                        oneofKind: "result",
-                        result: reader.bool()
-                    };
+                case /* float score */ 2:
+                    message.score = reader.float();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -217,19 +180,13 @@ class SingleEvalResult$Type extends MessageType<SingleEvalResult> {
         }
         return message;
     }
-    internalBinaryWrite(message: SingleEvalResult, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* bool error = 1; */
-        if (message.singleEvalResultOneOf.oneofKind === "error")
-            writer.tag(1, WireType.Varint).bool(message.singleEvalResultOneOf.error);
-        /* int64 score = 2; */
-        if (message.singleEvalResultOneOf.oneofKind === "score")
-            writer.tag(2, WireType.Varint).int64(message.singleEvalResultOneOf.score);
-        /* float percentage = 3; */
-        if (message.singleEvalResultOneOf.oneofKind === "percentage")
-            writer.tag(3, WireType.Bit32).float(message.singleEvalResultOneOf.percentage);
-        /* bool result = 4; */
-        if (message.singleEvalResultOneOf.oneofKind === "result")
-            writer.tag(4, WireType.Varint).bool(message.singleEvalResultOneOf.result);
+    internalBinaryWrite(message: EvalScore, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string eval_hash = 1; */
+        if (message.evalHash !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.evalHash);
+        /* float score = 2; */
+        if (message.score !== 0)
+            writer.tag(2, WireType.Bit32).float(message.score);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -237,15 +194,15 @@ class SingleEvalResult$Type extends MessageType<SingleEvalResult> {
     }
 }
 /**
- * @generated MessageType for protobuf message ollyllm.v1.SingleEvalResult
+ * @generated MessageType for protobuf message ollyllm.v1.EvalScore
  */
-export const SingleEvalResult = new SingleEvalResult$Type();
+export const EvalScore = new EvalScore$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
     constructor() {
         super("ollyllm.v1.RecordEvalRequest", [
             { no: 1, name: "versioned_eval", kind: "message", T: () => VersionedEval },
-            { no: 2, name: "eval_results", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => SingleEvalResult }
+            { no: 2, name: "eval_results", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => EvalScore }
         ]);
     }
     create(value?: PartialMessage<RecordEvalRequest>): RecordEvalRequest {
@@ -263,8 +220,8 @@ class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
                 case /* ollyllm.v1.VersionedEval versioned_eval */ 1:
                     message.versionedEval = VersionedEval.internalBinaryRead(reader, reader.uint32(), options, message.versionedEval);
                     break;
-                case /* repeated ollyllm.v1.SingleEvalResult eval_results */ 2:
-                    message.evalResults.push(SingleEvalResult.internalBinaryRead(reader, reader.uint32(), options));
+                case /* repeated ollyllm.v1.EvalScore eval_results */ 2:
+                    message.evalResults.push(EvalScore.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -281,9 +238,9 @@ class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
         /* ollyllm.v1.VersionedEval versioned_eval = 1; */
         if (message.versionedEval)
             VersionedEval.internalBinaryWrite(message.versionedEval, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* repeated ollyllm.v1.SingleEvalResult eval_results = 2; */
+        /* repeated ollyllm.v1.EvalScore eval_results = 2; */
         for (let i = 0; i < message.evalResults.length; i++)
-            SingleEvalResult.internalBinaryWrite(message.evalResults[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            EvalScore.internalBinaryWrite(message.evalResults[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -299,13 +256,15 @@ class RecordEvalResponse$Type extends MessageType<RecordEvalResponse> {
     constructor() {
         super("ollyllm.v1.RecordEvalResponse", [
             { no: 1, name: "result", kind: "enum", T: () => ["ollyllm.v1.EvalResult", EvalResult] },
-            { no: 2, name: "previous_eval_results", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => SingleEvalResult }
+            { no: 2, name: "previous_eval_scores", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => EvalScore },
+            { no: 3, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<RecordEvalResponse>): RecordEvalResponse {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.result = 0;
-        message.previousEvalResults = [];
+        message.previousEvalScores = [];
+        message.message = "";
         if (value !== undefined)
             reflectionMergePartial<RecordEvalResponse>(this, message, value);
         return message;
@@ -318,8 +277,11 @@ class RecordEvalResponse$Type extends MessageType<RecordEvalResponse> {
                 case /* ollyllm.v1.EvalResult result */ 1:
                     message.result = reader.int32();
                     break;
-                case /* repeated ollyllm.v1.SingleEvalResult previous_eval_results */ 2:
-                    message.previousEvalResults.push(SingleEvalResult.internalBinaryRead(reader, reader.uint32(), options));
+                case /* repeated ollyllm.v1.EvalScore previous_eval_scores */ 2:
+                    message.previousEvalScores.push(EvalScore.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* string message */ 3:
+                    message.message = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -336,9 +298,12 @@ class RecordEvalResponse$Type extends MessageType<RecordEvalResponse> {
         /* ollyllm.v1.EvalResult result = 1; */
         if (message.result !== 0)
             writer.tag(1, WireType.Varint).int32(message.result);
-        /* repeated ollyllm.v1.SingleEvalResult previous_eval_results = 2; */
-        for (let i = 0; i < message.previousEvalResults.length; i++)
-            SingleEvalResult.internalBinaryWrite(message.previousEvalResults[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* repeated ollyllm.v1.EvalScore previous_eval_scores = 2; */
+        for (let i = 0; i < message.previousEvalScores.length; i++)
+            EvalScore.internalBinaryWrite(message.previousEvalScores[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* string message = 3; */
+        if (message.message !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.message);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
