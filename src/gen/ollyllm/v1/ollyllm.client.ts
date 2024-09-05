@@ -4,6 +4,8 @@
 import type { RpcTransport } from "@protobuf-ts/runtime-rpc";
 import type { ServiceInfo } from "@protobuf-ts/runtime-rpc";
 import { OllyllmService } from "./ollyllm";
+import type { RecordEvalResponse } from "./eval";
+import type { RecordEvalRequest } from "./eval";
 import type { ReportSpanRequest } from "./span";
 import { stackIntercept } from "@protobuf-ts/runtime-rpc";
 import type { Empty } from "../../google/protobuf/empty";
@@ -22,6 +24,10 @@ export interface IOllyllmServiceClient {
      * @generated from protobuf rpc: ReportSpan(ollyllm.v1.ReportSpanRequest) returns (google.protobuf.Empty);
      */
     reportSpan(input: ReportSpanRequest, options?: RpcOptions): UnaryCall<ReportSpanRequest, Empty>;
+    /**
+     * @generated from protobuf rpc: RecordEval(ollyllm.v1.RecordEvalRequest) returns (ollyllm.v1.RecordEvalResponse);
+     */
+    recordEval(input: RecordEvalRequest, options?: RpcOptions): UnaryCall<RecordEvalRequest, RecordEvalResponse>;
 }
 /**
  * @generated from protobuf service ollyllm.v1.OllyllmService
@@ -45,5 +51,12 @@ export class OllyllmServiceClient implements IOllyllmServiceClient, ServiceInfo 
     reportSpan(input: ReportSpanRequest, options?: RpcOptions): UnaryCall<ReportSpanRequest, Empty> {
         const method = this.methods[1], opt = this._transport.mergeOptions(options);
         return stackIntercept<ReportSpanRequest, Empty>("unary", this._transport, method, opt, input);
+    }
+    /**
+     * @generated from protobuf rpc: RecordEval(ollyllm.v1.RecordEvalRequest) returns (ollyllm.v1.RecordEvalResponse);
+     */
+    recordEval(input: RecordEvalRequest, options?: RpcOptions): UnaryCall<RecordEvalRequest, RecordEvalResponse> {
+        const method = this.methods[2], opt = this._transport.mergeOptions(options);
+        return stackIntercept<RecordEvalRequest, RecordEvalResponse>("unary", this._transport, method, opt, input);
     }
 }
