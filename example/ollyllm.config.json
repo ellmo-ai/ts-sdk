@@ -1,10 +1,13 @@
 {
     "apiBaseUrl": "http://localhost:3000",
     "tests": {
-        "testsPath": "./tests",
+        "testsPath": "./ai/tests",
         "packageJsonPath": "./package.json",
         "includeDependencies": [
             "typescript"
         ]
+    },
+    "prompts": {
+        "promptsPath": "./ai/prompts"
     }
 }

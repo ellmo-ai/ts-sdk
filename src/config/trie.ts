@@ -22,18 +22,15 @@ export class Trie {
     }
 
     private searchHelper(word: string, index: number, path: string[]): boolean {
-        console.log('Searching', word, index, path);
         if (index === word.length) {
             return this.isTerminal;
         }
 
         const char = word[index];
-        console.log(char);
 
         const wildcard = this.children.get('*');
 
         if (wildcard) {
-            console.log('Found wildcard', char);
             // If there is a wildcard that is terminal, we found a match
             if (wildcard.isTerminal) {
                 return true;

@@ -35,10 +35,11 @@ function execute() {
 
 const commandMap = {
     register: () => execSync(`ts-node ${path.join(__dirname, 'dist/test/register/index.js')}`, { stdio: 'inherit' }),
-    execute: execute
+    eval: () => execSync(`ts-node ${path.join(__dirname, 'dist/eval/eval.js')}`, { stdio: 'inherit' }),
+    execute: execute,
 };
 
-if (commandMap[command]) {
+if (command in commandMap) {
     commandMap[command]();
 } else {
     console.error(`Unknown command: ${command}`);

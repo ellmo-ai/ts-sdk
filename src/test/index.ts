@@ -1,7 +1,14 @@
 /** A test definition. */
 export class Test<T> {
     public constructor(
-        { id, version, func }: { id: string, version: string, func: (input: T) => string | boolean | number }
+        { id, version, func }: {
+            /** The ID of the test. */
+            id: string,
+            /** The version of the test. */
+            version: string,
+            /** The function that performs the test on the input. */
+            func: (input: T) => string | boolean | number
+        }
     ) {
         this.id = id;
         this.version = version;
