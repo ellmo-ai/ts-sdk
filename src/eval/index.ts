@@ -51,9 +51,16 @@ export class Eval<T extends BinaryLike, U extends string | boolean | number> {
 
         return await Promise.all(data.map(async ({ input, expected }) => {
             const output = await this.run(input);
+
+            const evalHash = createHash('sha256').update(`${input}${expected}`).digest('hex');
             return {
-                hash: createHash('sha256').update(`${input}${expected}`).digest('hex'),
+                hash: evalHash,
                 score: await this.scoring(input, expected, output),
+                io: {
+                    input,
+                    expected,
+                    output,
+                }
             }
         }));
     }

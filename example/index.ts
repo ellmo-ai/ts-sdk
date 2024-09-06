@@ -40,7 +40,7 @@ const example = new Example();
 console.log('Calling tested method');
 example.testedMethod();
 
-const openai = new OpenAI({
-    apiKey: '',
-});
-const wrappedClient = wrappedOpenAI(openai);
+// const openai = new OpenAI({
+//     apiKey: '',
+// });
+// const wrappedClient = wrappedOpenAI(openai);

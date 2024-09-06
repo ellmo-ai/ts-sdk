@@ -15,7 +15,7 @@ export class RemoveUUID extends Prompt<string, string> {
     protected model = "gpt-3.5-turbo";
 
     protected get systemPrompt(): string {
-        return "You will be given a string that may include UUIDs. Return the string with all UUIDs removed. Respond only with the string.";
+        return "You will be given a string that may include UUIDs.";
     }
 
     protected async prepare(): Promise<(input: string) => Promise<string>> {

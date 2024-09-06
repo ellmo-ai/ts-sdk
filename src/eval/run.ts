@@ -60,6 +60,11 @@ const program = new Command()
                 process.exit(1);
             }
 
+            const hashToIOPair = new Map<string, Scores[number]['io']>();
+            for (const score of scores) {
+                hashToIOPair.set(score.hash, score.io);
+            }
+
             const payload = formPayload(ev, scores);
 
             let response: RecordEvalResponse;
@@ -73,11 +78,14 @@ const program = new Command()
 
             console.log('');
 
+            let color = undefined;
             switch (response.outcome) {
                 case EvalOutcome.IMPROVEMENT:
+                    color = chalk.green;
                     console.log(chalk.green('Eval improved!'));
                     break;
                 case EvalOutcome.REGRESSION:
+                    color = chalk.red;
                     console.log(chalk.red('Eval regressed!'));
                     break;
                 case EvalOutcome.NO_CHANGE:
@@ -89,6 +97,37 @@ const program = new Command()
                 default:
                     console.error('Unknown result:', response.outcome);
                     break;
+            }
+
+            const meaningfulScores = response.meaningfulEvalScores;
+            if (meaningfulScores.length > 0) {
+                if (color) {
+                    console.log(color.bold.underline('\nMeaningful eval scores:'));
+                } else {
+                    console.log(chalk.bold.underline('\nMeaningful eval scores:'));
+                }
+
+                for (const score of meaningfulScores) {
+                    const ioPair = hashToIOPair.get(score.evalHash);
+                    if (!ioPair) {
+                        // Should never happen
+                        throw new Error('Input/expected pair not found for eval hash');
+                    }
+
+                    // Pretty print the input/output pair and the score change
+                    console.log(`\nInput: ${chalk.blue(JSON.stringify(ioPair.input))}`);
+                    console.log(`Expected: ${chalk.blue(JSON.stringify(ioPair.expected))}`);
+                    console.log(`Actual: ${chalk.blue(JSON.stringify(ioPair.output))}`);
+
+                    let color = chalk.gray;
+                    if (score.outcome === EvalOutcome.IMPROVEMENT) {
+                        color = chalk.green;
+                    } else if (score.outcome === EvalOutcome.REGRESSION) {
+                        color = chalk.red;
+                    }
+
+                    console.log(chalk.bold(`Score: ${color(`${score.previousScore} -> ${score.currentScore}`)}`));
+                }
             }
         }
     });
