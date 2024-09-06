@@ -6,7 +6,8 @@ import ts from 'typescript';
 import fs from 'fs';
 import { Config } from '../config';
 import { Eval } from '.';
-import { RecordEvalRequest, RecordEvalResponse, EvalScore, EvalResult } from '../gen/ollyllm/v1/eval';
+import { RecordEvalRequest, RecordEvalResponse, EvalOutcome } from '../gen/ollyllm/v1/eval';
+import chalk from 'chalk';
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 type Scores = UnwrapPromise<ReturnType<Eval<any, any>['runEval']>>;
@@ -70,7 +71,25 @@ const program = new Command()
                 process.exit(1);
             }
 
-            console.log('Eval recorded:', response);
+            console.log('');
+
+            switch (response.outcome) {
+                case EvalOutcome.IMPROVEMENT:
+                    console.log(chalk.green('Eval improved!'));
+                    break;
+                case EvalOutcome.REGRESSION:
+                    console.log(chalk.red('Eval regressed!'));
+                    break;
+                case EvalOutcome.NO_CHANGE:
+                    console.log('Eval did not significantly change.');
+                    break;
+                case EvalOutcome.UNKNOWN:
+                    console.log('Eval outcome unknown.');
+                    break;
+                default:
+                    console.error('Unknown result:', response.outcome);
+                    break;
+            }
         }
     });
 
@@ -82,7 +101,7 @@ function formPayload(ev: Eval<any, any>, scores: Scores): RecordEvalRequest {
             name: ev.id,
             version: ev.version,
         },
-        evalResults: scores.map(score => {
+        evalScores: scores.map(score => {
             return {
                 evalHash: score.hash,
                 score: score.score

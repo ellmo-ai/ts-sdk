@@ -41,6 +41,6 @@ console.log('Calling tested method');
 example.testedMethod();
 
 const openai = new OpenAI({
-    apiKey: '1234',
+    apiKey: '',
 });
 const wrappedClient = wrappedOpenAI(openai);
