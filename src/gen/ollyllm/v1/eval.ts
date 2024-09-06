@@ -83,9 +83,13 @@ export enum EvalOutcome {
      */
     REGRESSION = 1,
     /**
-     * @generated from protobuf enum value: UNKNOWN = 2;
+     * @generated from protobuf enum value: NO_CHANGE = 3;
      */
-    UNKNOWN = 2
+    NO_CHANGE = 3,
+    /**
+     * @generated from protobuf enum value: UNKNOWN = 4;
+     */
+    UNKNOWN = 4
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class VersionedEval$Type extends MessageType<VersionedEval> {
