@@ -1,10 +1,14 @@
 {
     "apiBaseUrl": "http://localhost:3000",
+    "rpcBaseUrl": "localhost:50051",
     "tests": {
-        "testsPath": "./tests",
+        "testsPath": "./ai/tests",
         "packageJsonPath": "./package.json",
         "includeDependencies": [
             "typescript"
         ]
+    },
+    "prompts": {
+        "promptsPath": "./ai/prompts"
     }
 }

@@ -1,10 +1,15 @@
 import path from "path";
 import fs from 'fs';
 import { Trie } from "./trie";
+import { GrpcTransport } from "@protobuf-ts/grpc-transport";
+import { ChannelCredentials } from "@grpc/grpc-js";
+import { OllyllmServiceClient } from "../gen/ollyllm/v1/ollyllm.client";
 
 export interface OllyLLMConfig {
     /** Base URL for the API */
     apiBaseUrl: string;
+    /** Base URL for the gRPC API */
+    rpcBaseUrl: string;
     tests: {
         /** Path to the tests directory */
         testsPath: string;
@@ -13,6 +18,12 @@ export interface OllyLLMConfig {
         /** Allowlist of dependencies to include in the bundle */
         includeDependencies: string[];
     },
+    prompts: {
+        /** Path to the prompts directory */
+        promptsPath: string;
+        /** Path to the evals directory, if not provided, evals will be retrieved from the prompts directory */
+        evalsPath?: string;
+    }
 }
 
 /** 
@@ -46,26 +57,34 @@ export function readConfig(configPath: string): OllyLLMConfig {
 }
 
 export class Config {
+    private configPath: string;
+
     public opts: OllyLLMConfig;
     private allowedDeps: Trie;
+    public rpcClient: OllyllmServiceClient;
 
     constructor() {
         const currentDir = process.cwd();
-        const configPath = findConfigFile(currentDir);
+        this.configPath = findConfigFile(currentDir);
 
-        if (!configPath) {
+        if (!this.configPath) {
             throw new Error('ollyllm.config.json not found in the current directory or any parent directory.');
         }
 
-        this.opts = readConfig(configPath);
+        this.opts = readConfig(this.configPath);
         this.opts = {
             ...this.opts,
             tests: {
                 ...this.opts.tests,
-                testsPath: path.resolve(path.dirname(configPath), this.opts.tests.testsPath),
-                packageJsonPath: path.resolve(path.dirname(configPath), this.opts.tests.packageJsonPath),
+                testsPath: this.resolveRelativePath(this.opts.tests.testsPath),
+                packageJsonPath: this.resolveRelativePath(this.opts.tests.packageJsonPath),
                 includeDependencies: [...this.opts.tests.includeDependencies, '@ollyllm/*'],
             },
+            prompts: {
+                ...this.opts.prompts,
+                promptsPath: this.resolveRelativePath(this.opts.prompts.promptsPath),
+                evalsPath: this.opts.prompts.evalsPath ? this.resolveRelativePath(this.opts.prompts.evalsPath) : undefined,
+            }
         }
 
         if (!fs.existsSync(this.opts.tests.testsPath)) {
@@ -77,11 +96,30 @@ export class Config {
         }
 
         this.allowedDeps = Trie.buildTrie(this.opts.tests.includeDependencies);
-        console.log(this.allowedDeps.search('@ollyllm/test'));
+        const transport = new GrpcTransport({
+            host: this.opts.rpcBaseUrl,
+            channelCredentials: ChannelCredentials.createInsecure(),
+        });
+        this.rpcClient = new OllyllmServiceClient(transport);
     }
 
     public isDependencyAllowed(dependency: string): boolean {
         return this.allowedDeps.search(dependency);
+    }
+
+    public getPath(name: "tests" | "prompts" | "evals"): string {
+        switch (name) {
+            case "tests":
+                return this.opts.tests.testsPath;
+            case "prompts":
+                return this.opts.prompts.promptsPath;
+            case "evals":
+                return this.opts.prompts.evalsPath ?? this.opts.prompts.promptsPath;
+        }
+    }
+
+    public resolveRelativePath(relativePath: string): string {
+        return path.resolve(path.dirname(this.configPath), relativePath);
     }
 }
 

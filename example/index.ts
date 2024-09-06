@@ -2,7 +2,7 @@ import { OpenAI } from "openai";
 
 import { init, Tracing } from "../src/tracing/logger";
 import { wrappedOpenAI } from "../src/tracing/wrap/openai";
-import { no420, noUUID } from "./tests/simple/noUUID.olly";
+import { no420, noUUID } from "./ai/tests/simple/noUUID.olly";
 
 const _logger = init({
     apiKey: '1234',
@@ -40,7 +40,7 @@ const example = new Example();
 console.log('Calling tested method');
 example.testedMethod();
 
-const openai = new OpenAI({
-    apiKey: '1234',
-});
-const wrappedClient = wrappedOpenAI(openai);
+// const openai = new OpenAI({
+//     apiKey: '',
+// });
+// const wrappedClient = wrappedOpenAI(openai);
