@@ -26,6 +26,8 @@ export interface VersionedEval {
     version: string; // SemVer of test
 }
 /**
+ *  EvalScore represents a single score of an eval.
+ *
  * @generated from protobuf message ollyllm.v1.EvalScore
  */
 export interface EvalScore {
@@ -54,23 +56,54 @@ export interface RecordEvalRequest {
     evalScores: EvalScore[]; // List of eval scores
 }
 /**
+ * MeaningfulEvalScore represents a meaningful eval score.
+ *
+ * @generated from protobuf message ollyllm.v1.MeaningfulEvalScore
+ */
+export interface MeaningfulEvalScore {
+    /**
+     * @generated from protobuf field: string eval_hash = 1;
+     */
+    evalHash: string; // Hash of the eval input/expected
+    /**
+     * @generated from protobuf field: float previous_score = 2;
+     */
+    previousScore: number; // Previous score
+    /**
+     * @generated from protobuf field: float current_score = 3;
+     */
+    currentScore: number; // Current score
+    /**
+     * @generated from protobuf field: ollyllm.v1.EvalOutcome outcome = 4;
+     */
+    outcome: EvalOutcome; // Outcome of the eval
+}
+/**
+ *  RecordEvalResponse represents a response to a record eval request.
+ *
  * @generated from protobuf message ollyllm.v1.RecordEvalResponse
  */
 export interface RecordEvalResponse {
     /**
      * @generated from protobuf field: ollyllm.v1.EvalOutcome outcome = 1;
      */
-    outcome: EvalOutcome;
+    outcome: EvalOutcome; // Outcome of the eval
     /**
      * @generated from protobuf field: repeated ollyllm.v1.EvalScore previous_eval_scores = 2;
      */
-    previousEvalScores: EvalScore[];
+    previousEvalScores: EvalScore[]; // List of previous eval scores
     /**
-     * @generated from protobuf field: string message = 3;
+     * @generated from protobuf field: repeated ollyllm.v1.MeaningfulEvalScore meaningful_eval_scores = 3;
      */
-    message: string;
+    meaningfulEvalScores: MeaningfulEvalScore[]; // Analysis of meaningful eval scores
+    /**
+     * @generated from protobuf field: string message = 4;
+     */
+    message: string; // Any message to the user
 }
 /**
+ * EvalOutcome represents the outcome of an eval.
+ *
  * @generated from protobuf enum ollyllm.v1.EvalOutcome
  */
 export enum EvalOutcome {
@@ -256,18 +289,91 @@ class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
  */
 export const RecordEvalRequest = new RecordEvalRequest$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class MeaningfulEvalScore$Type extends MessageType<MeaningfulEvalScore> {
+    constructor() {
+        super("ollyllm.v1.MeaningfulEvalScore", [
+            { no: 1, name: "eval_hash", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "previous_score", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
+            { no: 3, name: "current_score", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
+            { no: 4, name: "outcome", kind: "enum", T: () => ["ollyllm.v1.EvalOutcome", EvalOutcome] }
+        ]);
+    }
+    create(value?: PartialMessage<MeaningfulEvalScore>): MeaningfulEvalScore {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.evalHash = "";
+        message.previousScore = 0;
+        message.currentScore = 0;
+        message.outcome = 0;
+        if (value !== undefined)
+            reflectionMergePartial<MeaningfulEvalScore>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: MeaningfulEvalScore): MeaningfulEvalScore {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string eval_hash */ 1:
+                    message.evalHash = reader.string();
+                    break;
+                case /* float previous_score */ 2:
+                    message.previousScore = reader.float();
+                    break;
+                case /* float current_score */ 3:
+                    message.currentScore = reader.float();
+                    break;
+                case /* ollyllm.v1.EvalOutcome outcome */ 4:
+                    message.outcome = reader.int32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: MeaningfulEvalScore, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string eval_hash = 1; */
+        if (message.evalHash !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.evalHash);
+        /* float previous_score = 2; */
+        if (message.previousScore !== 0)
+            writer.tag(2, WireType.Bit32).float(message.previousScore);
+        /* float current_score = 3; */
+        if (message.currentScore !== 0)
+            writer.tag(3, WireType.Bit32).float(message.currentScore);
+        /* ollyllm.v1.EvalOutcome outcome = 4; */
+        if (message.outcome !== 0)
+            writer.tag(4, WireType.Varint).int32(message.outcome);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message ollyllm.v1.MeaningfulEvalScore
+ */
+export const MeaningfulEvalScore = new MeaningfulEvalScore$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class RecordEvalResponse$Type extends MessageType<RecordEvalResponse> {
     constructor() {
         super("ollyllm.v1.RecordEvalResponse", [
             { no: 1, name: "outcome", kind: "enum", T: () => ["ollyllm.v1.EvalOutcome", EvalOutcome] },
             { no: 2, name: "previous_eval_scores", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => EvalScore },
-            { no: 3, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 3, name: "meaningful_eval_scores", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => MeaningfulEvalScore },
+            { no: 4, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<RecordEvalResponse>): RecordEvalResponse {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.outcome = 0;
         message.previousEvalScores = [];
+        message.meaningfulEvalScores = [];
         message.message = "";
         if (value !== undefined)
             reflectionMergePartial<RecordEvalResponse>(this, message, value);
@@ -284,7 +390,10 @@ class RecordEvalResponse$Type extends MessageType<RecordEvalResponse> {
                 case /* repeated ollyllm.v1.EvalScore previous_eval_scores */ 2:
                     message.previousEvalScores.push(EvalScore.internalBinaryRead(reader, reader.uint32(), options));
                     break;
-                case /* string message */ 3:
+                case /* repeated ollyllm.v1.MeaningfulEvalScore meaningful_eval_scores */ 3:
+                    message.meaningfulEvalScores.push(MeaningfulEvalScore.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* string message */ 4:
                     message.message = reader.string();
                     break;
                 default:
@@ -305,9 +414,12 @@ class RecordEvalResponse$Type extends MessageType<RecordEvalResponse> {
         /* repeated ollyllm.v1.EvalScore previous_eval_scores = 2; */
         for (let i = 0; i < message.previousEvalScores.length; i++)
             EvalScore.internalBinaryWrite(message.previousEvalScores[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        /* string message = 3; */
+        /* repeated ollyllm.v1.MeaningfulEvalScore meaningful_eval_scores = 3; */
+        for (let i = 0; i < message.meaningfulEvalScores.length; i++)
+            MeaningfulEvalScore.internalBinaryWrite(message.meaningfulEvalScores[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        /* string message = 4; */
         if (message.message !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.message);
+            writer.tag(4, WireType.LengthDelimited).string(message.message);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
