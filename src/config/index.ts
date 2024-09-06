@@ -8,6 +8,8 @@ import { OllyllmServiceClient } from "../gen/ollyllm/v1/ollyllm.client";
 export interface OllyLLMConfig {
     /** Base URL for the API */
     apiBaseUrl: string;
+    /** Base URL for the gRPC API */
+    rpcBaseUrl: string;
     tests: {
         /** Path to the tests directory */
         testsPath: string;
@@ -95,7 +97,7 @@ export class Config {
 
         this.allowedDeps = Trie.buildTrie(this.opts.tests.includeDependencies);
         const transport = new GrpcTransport({
-            host: this.opts.apiBaseUrl,
+            host: this.opts.rpcBaseUrl,
             channelCredentials: ChannelCredentials.createInsecure(),
         });
         this.rpcClient = new OllyllmServiceClient(transport);

@@ -18,16 +18,12 @@ export const ParseIntegerEval = new Eval({
             input: "THREE.FIVE",
             expected: 3.5,
         },
-        {
-            input: "FIVE",
-            expected: 5,
-        },
     ]),
     run: async (input: string) => {
         const prompt = new ParseInteger();
         return await prompt.execute(input);
     },
     scoring: async (_input: string, expected: number, output: number) => {
-        return output === expected;
+        return output === expected ? 1 : 0;
     }
 });

@@ -1,3 +1,4 @@
+import { BinaryLike, createHash } from "crypto";
 import { Prompt } from "../prompt";
 
 type EvalData<T, U> = {
@@ -7,9 +8,9 @@ type EvalData<T, U> = {
 
 type EvalDataFunction<T, U> = () => EvalData<T, U> | Promise<EvalData<T, U>>;
 type EvalRunFunction<T, U> = (input: T) => U | Promise<U>;
-type EvalScoringFunction<T, U> = (input: T, expected: U, output: U) => number | Promise<number | boolean>;
+type EvalScoringFunction<T, U> = (input: T, expected: U, output: U) => number | Promise<number>;
 
-export class Eval<T, U extends string | boolean | number> {
+export class Eval<T extends BinaryLike, U extends string | boolean | number> {
     public constructor(
         {
             id,
@@ -49,15 +50,10 @@ export class Eval<T, U extends string | boolean | number> {
         const data = await this.data();
 
         return await Promise.all(data.map(async ({ input, expected }) => {
-            try {
-                const output = await this.run(input);
-                return {
-                    result: await this.scoring(input, expected, output),
-                };
-            } catch (error) {
-                return {
-                    error: true,
-                };
+            const output = await this.run(input);
+            return {
+                hash: createHash('sha256').update(`${input}${expected}`).digest('hex'),
+                score: await this.scoring(input, expected, output),
             }
         }));
     }

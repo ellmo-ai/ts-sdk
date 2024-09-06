@@ -6,6 +6,10 @@ import ts from 'typescript';
 import fs from 'fs';
 import { Config } from '../config';
 import { Eval } from '.';
+import { RecordEvalRequest, RecordEvalResponse, EvalScore, EvalResult } from '../gen/ollyllm/v1/eval';
+
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+type Scores = UnwrapPromise<ReturnType<Eval<any, any>['runEval']>>;
 
 const program = new Command()
     .version('1.0.0')
@@ -47,17 +51,45 @@ const program = new Command()
                 process.exit(1);
             }
 
-            let scores: any;
+            let scores: Scores;
             try {
                 scores = await ev.runEval();
             } catch (error) {
                 console.error('Error executing eval:', error);
                 process.exit(1);
             }
+
+            const payload = formPayload(ev, scores);
+
+            let response: RecordEvalResponse;
+            try {
+                const res = await config.rpcClient.recordEval(payload);
+                response = res.response;
+            } catch (error) {
+                console.error('Error recording eval:', error);
+                process.exit(1);
+            }
+
+            console.log('Eval recorded:', response);
         }
     });
 
 program.parse(process.argv);
+
+function formPayload(ev: Eval<any, any>, scores: Scores): RecordEvalRequest {
+    return {
+        versionedEval: {
+            name: ev.id,
+            version: ev.version,
+        },
+        evalResults: scores.map(score => {
+            return {
+                evalHash: score.hash,
+                score: score.score
+            }
+        }),
+    };
+}
 
 function getPromptClasses(config: Config, promptPath: string): ts.ClassDeclaration[] {
     const sourceFile = ts.createSourceFile(
