@@ -1,4 +1,4 @@
-import { Eval } from "@ollyllm/ts-sdk/dist/eval";
+import { Eval } from "@polay-ai/ts-sdk/dist/eval";
 import { RemoveUUID } from "./RemoveUUID";
 
 export const RemoveUUIDEval = new Eval({

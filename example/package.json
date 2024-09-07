@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ollyllm/ts-sdk": "link:../",
+    "@polay-ai/ts-sdk": "link:../",
     "typescript": "^5.4.5"
   }
 }

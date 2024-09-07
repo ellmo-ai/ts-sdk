@@ -78,7 +78,7 @@ export class Config {
                 ...this.opts.tests,
                 testsPath: this.resolveRelativePath(this.opts.tests.testsPath),
                 packageJsonPath: this.resolveRelativePath(this.opts.tests.packageJsonPath),
-                includeDependencies: [...this.opts.tests.includeDependencies, '@ollyllm/*'],
+                includeDependencies: [...this.opts.tests.includeDependencies, '@polay-ai/*'],
             },
             prompts: {
                 ...this.opts.prompts,

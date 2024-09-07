@@ -14,16 +14,16 @@ jobs:
       - name: Checkout proto files
         uses: actions/checkout@v3
         with:
-          repository: ollyLLM/backend
+          repository: polay-ai/backend
           token: ${{ secrets.SYNC_TOKEN }}
           path: backend
 
-      - name: Checkout sdk
+      - name: Checkout ts-sdk
         uses: actions/checkout@v3
         with:
-          repository: ollyLLM/sdk
+          repository: polay-ai/ts-sdk
           token: ${{ secrets.SYNC_TOKEN }}
-          path: sdk
+          path: ts-sdk
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -36,37 +36,37 @@ jobs:
           github_token: ${{ secrets.SYNC_TOKEN }}
 
       - name: Install buf TS dependencies
-        working-directory: sdk
+        working-directory: ts-sdk
         run: npm install @protobuf-ts/plugin
 
-      - name: Copy proto files to sdk directory
+      - name: Copy proto files to ts-sdk directory
         run: |
-          mkdir -p sdk/proto/
-          cp -a backend/proto/src/definitions/* sdk/proto/
+          mkdir -p ts-sdk/proto/
+          cp -a backend/proto/src/definitions/* ts-sdk/proto/
         
       - name: Remove old generated files
-        working-directory: sdk
+        working-directory: ts-sdk
         run: rm -rf src/gen
 
       - name: Generate protos
-        working-directory: sdk
+        working-directory: ts-sdk
         run: buf generate
 
       - name: Check if there are changes
-        working-directory: sdk
+        working-directory: ts-sdk
         run: |
           git diff --exit-code src/gen || exit 0
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v4
         with:
-          path: sdk # Relative to GITHUB_WORKSPACE
+          path: ts-sdk # Relative to GITHUB_WORKSPACE
           add-paths: src/gen
           token: ${{ secrets.SYNC_TOKEN }}
           base: main
           head: ${{ env.BRANCH }}
           title: "Sync Generate proto @ ${{ env.COMMIT_SHA }}"
           body: |
-            Update proto files in sdk with latest changes from backend
+            Update proto files in ts-sdk with latest changes from backend
           author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>

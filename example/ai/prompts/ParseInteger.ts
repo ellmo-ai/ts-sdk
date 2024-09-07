@@ -1,5 +1,5 @@
-import { Prompt } from "@ollyllm/ts-sdk/dist/prompt"
-import { HasEval } from "@ollyllm/ts-sdk/dist/eval"
+import { Prompt } from "@polay-ai/ts-sdk/dist/prompt"
+import { HasEval } from "@polay-ai/ts-sdk/dist/eval"
 
 @HasEval
 export class ParseInteger extends Prompt<string, number> {
