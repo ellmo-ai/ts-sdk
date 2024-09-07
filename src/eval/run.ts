@@ -6,7 +6,7 @@ import ts from 'typescript';
 import fs from 'fs';
 import { Config } from '../config';
 import { Eval } from '.';
-import { RecordEvalRequest, RecordEvalResponse, EvalOutcome } from '../gen/ollyllm/v1/eval';
+import { RecordEvalRequest, RecordEvalResponse, EvalOutcome } from '../gen/polay/v1/eval';
 import chalk from 'chalk';
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;

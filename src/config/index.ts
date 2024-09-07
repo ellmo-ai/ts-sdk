@@ -3,7 +3,7 @@ import fs from 'fs';
 import { Trie } from "./trie";
 import { GrpcTransport } from "@protobuf-ts/grpc-transport";
 import { ChannelCredentials } from "@grpc/grpc-js";
-import { OllyllmServiceClient } from "../gen/ollyllm/v1/ollyllm.client";
+import { PolayServiceClient } from "../gen/polay/v1/polay.client";
 
 export interface OllyLLMConfig {
     /** Base URL for the API */
@@ -61,7 +61,7 @@ export class Config {
 
     public opts: OllyLLMConfig;
     private allowedDeps: Trie;
-    public rpcClient: OllyllmServiceClient;
+    public rpcClient: PolayServiceClient;
 
     constructor() {
         const currentDir = process.cwd();
@@ -100,7 +100,7 @@ export class Config {
             host: this.opts.rpcBaseUrl,
             channelCredentials: ChannelCredentials.createInsecure(),
         });
-        this.rpcClient = new OllyllmServiceClient(transport);
+        this.rpcClient = new PolayServiceClient(transport);
     }
 
     public isDependencyAllowed(dependency: string): boolean {
