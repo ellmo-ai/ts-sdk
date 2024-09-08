@@ -5,18 +5,17 @@ import path from 'path';
 import ts from 'typescript';
 import fs from 'fs';
 import { Config } from '../config';
-import { Eval } from '.';
+import { Eval, EvalScores } from '.';
 import { RecordEvalRequest, RecordEvalResponse, EvalOutcome } from '../gen/polay/v1/eval';
 import chalk from 'chalk';
-
-type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
-type Scores = UnwrapPromise<ReturnType<Eval<any, any>['runEval']>>;
+import { execSync } from 'child_process';
 
 const program = new Command()
     .version('1.0.0')
     .description('CLI to run evals')
     .requiredOption('-path, --path <path>', 'Path to the prompt file to run evals for')
-    .action(async ({ path: promptPath }: { path: string }) => {
+    .option('--base <base>', 'Base tag to compare against, if not provided will use the base SHA.')
+    .action(async ({ path: promptPath, base }: { path: string, base: string }) => {
         let config: Config;
         try {
             config = new Config();
@@ -24,6 +23,9 @@ const program = new Command()
             console.error('Error:', error);
             process.exit(1);
         }
+
+        const baseSHA = base ?? execSync('git merge-base --fork-point HEAD').toString().trim();
+        const headSHA = execSync('git rev-parse HEAD').toString().trim();
 
         const workingDirectory = process.cwd();
         const absolutePath = path.resolve(workingDirectory, promptPath);
@@ -52,20 +54,21 @@ const program = new Command()
                 process.exit(1);
             }
 
-            let scores: Scores;
+            let scores: EvalScores;
             try {
-                scores = await ev.runEval();
+                // @ts-ignore - We know _runEval exists
+                scores = await ev._runEval();
             } catch (error) {
                 console.error('Error executing eval:', error);
                 process.exit(1);
             }
 
-            const hashToIOPair = new Map<string, Scores[number]['io']>();
+            const hashToIOPair = new Map<string, EvalScores[number]['io']>();
             for (const score of scores) {
                 hashToIOPair.set(score.hash, score.io);
             }
 
-            const payload = formPayload(ev, scores);
+            const payload = formPayload(ev, scores, { base: baseSHA, head: headSHA });
 
             let response: RecordEvalResponse;
             try {
@@ -134,11 +137,14 @@ const program = new Command()
 
 program.parse(process.argv);
 
-function formPayload(ev: Eval<any, any>, scores: Scores): RecordEvalRequest {
+function formPayload(ev: Eval<any, any>, scores: EvalScores, sha: {
+    base: string,
+    head: string
+}): RecordEvalRequest {
     return {
         versionedEval: {
             name: ev.id,
-            version: ev.version,
+            tag: sha.head
         },
         evalScores: scores.map(score => {
             return {
@@ -146,6 +152,7 @@ function formPayload(ev: Eval<any, any>, scores: Scores): RecordEvalRequest {
                 score: score.score
             }
         }),
+        baseTag: sha.base,
     };
 }
 
@@ -196,6 +203,27 @@ function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { fi
 
         let shouldRun = false;
         let evalExport: string | undefined = undefined;
+        let importEval = false; // Check if Eval is imported from the sdk
+
+        ts.forEachChild(evalSourceFile, (node) => {
+            if (ts.isImportDeclaration(node)) {
+                const moduleSpecifier = node.moduleSpecifier as ts.StringLiteral;
+                if (moduleSpecifier.text === '@polay-ai/ts-sdk/dist/eval') {
+                    const namedImports = node.importClause?.namedBindings as ts.NamedImports;
+                    if (namedImports.elements.some(importSpecifier => {
+                        // Check if the import is named 'Eval' or aliased to 'Eval'
+                        return importSpecifier.name.text === 'Eval' || importSpecifier.propertyName?.text === 'Eval';
+                    })) {
+                        importEval = true;
+                    }
+                }
+            }
+        });
+
+        console.log(importEval, evalFile);
+        if (!importEval) {
+            return;
+        }
 
         ts.forEachChild(evalSourceFile, (node) => {
             // Check if the eval file has any variable declaration of Eval type with prompt: <one of the classes>
@@ -234,6 +262,25 @@ function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { fi
                     const identifier = (prompt as ts.PropertyAssignment).initializer as ts.Identifier;
                     shouldRun = classes.some(clazz => clazz.name?.text === identifier.text);
                     evalExport = (declaration.name as ts.Identifier).text;
+                }
+            } else if (ts.isExportAssignment(node)) {
+                // Check if the export is an initializer of Eval class
+                const expression = node.expression as ts.CallExpression;
+                const name = (expression.expression as ts.Identifier).text;
+                if (name === 'Eval') {
+                    const promptProperty = expression.arguments[0] as ts.ObjectLiteralExpression;
+                    const prompt = promptProperty.properties.find(prop => {
+                        if (ts.isPropertyAssignment(prop)) {
+                            return prop.name.getText() === 'prompt';
+                        }
+                        return false;
+                    });
+
+                    if (prompt && ts.isIdentifier((prompt as ts.PropertyAssignment).initializer)) {
+                        const identifier = (prompt as ts.PropertyAssignment).initializer as ts.Identifier;
+                        shouldRun = classes.some(clazz => clazz.name?.text === identifier.text);
+                        evalExport = 'default';
+                    }
                 }
             }
         });

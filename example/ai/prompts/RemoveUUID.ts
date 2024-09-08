@@ -10,7 +10,7 @@ const openai = new OpenAI({
 
 @HasEval
 export class RemoveUUID extends Prompt<string, string> {
-    protected id = "ParseInteger";
+    protected id = "RemoveUUID";
     protected version = "0.0.1";
     protected model = "gpt-3.5-turbo";
 

@@ -1,9 +1,8 @@
 import { Eval } from "@polay-ai/ts-sdk/dist/eval";
 import { RemoveUUID } from "./RemoveUUID";
 
-export const RemoveUUIDEval = new Eval({
-    id: "ParseInteger",
-    version: "0.1.0",
+export default new Eval({
+    id: "RemoveUUID",
     prompt: RemoveUUID,
     data: () => ([
         {

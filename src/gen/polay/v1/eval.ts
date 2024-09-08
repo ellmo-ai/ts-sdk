@@ -19,11 +19,11 @@ export interface VersionedEval {
     /**
      * @generated from protobuf field: string name = 1;
      */
-    name: string; // ID of test
+    name: string; // ID of eval
     /**
-     * @generated from protobuf field: string version = 2;
+     * @generated from protobuf field: string tag = 2;
      */
-    version: string; // SemVer of test
+    tag: string; // Tag of eval
 }
 /**
  *  EvalScore represents a single score of an eval.
@@ -51,7 +51,11 @@ export interface RecordEvalRequest {
      */
     versionedEval?: VersionedEval; // Unique eval
     /**
-     * @generated from protobuf field: repeated polay.v1.EvalScore eval_scores = 2;
+     * @generated from protobuf field: string base_tag = 2;
+     */
+    baseTag: string; // Base tag to compare against
+    /**
+     * @generated from protobuf field: repeated polay.v1.EvalScore eval_scores = 3;
      */
     evalScores: EvalScore[]; // List of eval scores
 }
@@ -129,13 +133,13 @@ class VersionedEval$Type extends MessageType<VersionedEval> {
     constructor() {
         super("polay.v1.VersionedEval", [
             { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "version", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "tag", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<VersionedEval>): VersionedEval {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.name = "";
-        message.version = "";
+        message.tag = "";
         if (value !== undefined)
             reflectionMergePartial<VersionedEval>(this, message, value);
         return message;
@@ -148,8 +152,8 @@ class VersionedEval$Type extends MessageType<VersionedEval> {
                 case /* string name */ 1:
                     message.name = reader.string();
                     break;
-                case /* string version */ 2:
-                    message.version = reader.string();
+                case /* string tag */ 2:
+                    message.tag = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -166,9 +170,9 @@ class VersionedEval$Type extends MessageType<VersionedEval> {
         /* string name = 1; */
         if (message.name !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.name);
-        /* string version = 2; */
-        if (message.version !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.version);
+        /* string tag = 2; */
+        if (message.tag !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.tag);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -239,11 +243,13 @@ class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
     constructor() {
         super("polay.v1.RecordEvalRequest", [
             { no: 1, name: "versioned_eval", kind: "message", T: () => VersionedEval },
-            { no: 2, name: "eval_scores", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => EvalScore }
+            { no: 2, name: "base_tag", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "eval_scores", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => EvalScore }
         ]);
     }
     create(value?: PartialMessage<RecordEvalRequest>): RecordEvalRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.baseTag = "";
         message.evalScores = [];
         if (value !== undefined)
             reflectionMergePartial<RecordEvalRequest>(this, message, value);
@@ -257,7 +263,10 @@ class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
                 case /* polay.v1.VersionedEval versioned_eval */ 1:
                     message.versionedEval = VersionedEval.internalBinaryRead(reader, reader.uint32(), options, message.versionedEval);
                     break;
-                case /* repeated polay.v1.EvalScore eval_scores */ 2:
+                case /* string base_tag */ 2:
+                    message.baseTag = reader.string();
+                    break;
+                case /* repeated polay.v1.EvalScore eval_scores */ 3:
                     message.evalScores.push(EvalScore.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
@@ -275,9 +284,12 @@ class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
         /* polay.v1.VersionedEval versioned_eval = 1; */
         if (message.versionedEval)
             VersionedEval.internalBinaryWrite(message.versionedEval, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* repeated polay.v1.EvalScore eval_scores = 2; */
+        /* string base_tag = 2; */
+        if (message.baseTag !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.baseTag);
+        /* repeated polay.v1.EvalScore eval_scores = 3; */
         for (let i = 0; i < message.evalScores.length; i++)
-            EvalScore.internalBinaryWrite(message.evalScores[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            EvalScore.internalBinaryWrite(message.evalScores[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
