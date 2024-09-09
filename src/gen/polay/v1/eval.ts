@@ -11,19 +11,28 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 /**
- *  VersionedEval represents a unique eval.
+ *  Eval represents a unique eval.
  *
- * @generated from protobuf message polay.v1.VersionedEval
+ * @generated from protobuf message polay.v1.Eval
  */
-export interface VersionedEval {
+export interface Eval {
     /**
      * @generated from protobuf field: string name = 1;
      */
     name: string; // ID of eval
+}
+/**
+ * @generated from protobuf message polay.v1.VersionedPrompt
+ */
+export interface VersionedPrompt {
     /**
-     * @generated from protobuf field: string tag = 2;
+     * @generated from protobuf field: string name = 1;
      */
-    tag: string; // Tag of eval
+    name: string; // ID of prompt
+    /**
+     * @generated from protobuf field: string version = 2;
+     */
+    version: string; // Version of prompt
 }
 /**
  *  EvalScore represents a single score of an eval.
@@ -47,15 +56,19 @@ export interface EvalScore {
  */
 export interface RecordEvalRequest {
     /**
-     * @generated from protobuf field: polay.v1.VersionedEval versioned_eval = 1;
+     * @generated from protobuf field: polay.v1.Eval eval = 1;
      */
-    versionedEval?: VersionedEval; // Unique eval
+    eval?: Eval; // Eval that was run
     /**
-     * @generated from protobuf field: string base_tag = 2;
+     * @generated from protobuf field: polay.v1.VersionedPrompt prompt = 2;
      */
-    baseTag: string; // Base tag to compare against
+    prompt?: VersionedPrompt; // Prompt being evaluated
     /**
-     * @generated from protobuf field: repeated polay.v1.EvalScore eval_scores = 3;
+     * @generated from protobuf field: optional string base_version = 3;
+     */
+    baseVersion?: string; // Base version of prompt to compare against (if not defined, the previous version will be used)
+    /**
+     * @generated from protobuf field: repeated polay.v1.EvalScore eval_scores = 4;
      */
     evalScores: EvalScore[]; // List of eval scores
 }
@@ -129,31 +142,26 @@ export enum EvalOutcome {
     UNKNOWN = 4
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class VersionedEval$Type extends MessageType<VersionedEval> {
+class Eval$Type extends MessageType<Eval> {
     constructor() {
-        super("polay.v1.VersionedEval", [
-            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "tag", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        super("polay.v1.Eval", [
+            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<VersionedEval>): VersionedEval {
+    create(value?: PartialMessage<Eval>): Eval {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.name = "";
-        message.tag = "";
         if (value !== undefined)
-            reflectionMergePartial<VersionedEval>(this, message, value);
+            reflectionMergePartial<Eval>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: VersionedEval): VersionedEval {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Eval): Eval {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
                 case /* string name */ 1:
                     message.name = reader.string();
-                    break;
-                case /* string tag */ 2:
-                    message.tag = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -166,13 +174,10 @@ class VersionedEval$Type extends MessageType<VersionedEval> {
         }
         return message;
     }
-    internalBinaryWrite(message: VersionedEval, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: Eval, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string name = 1; */
         if (message.name !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.name);
-        /* string tag = 2; */
-        if (message.tag !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.tag);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -180,9 +185,64 @@ class VersionedEval$Type extends MessageType<VersionedEval> {
     }
 }
 /**
- * @generated MessageType for protobuf message polay.v1.VersionedEval
+ * @generated MessageType for protobuf message polay.v1.Eval
  */
-export const VersionedEval = new VersionedEval$Type();
+export const Eval = new Eval$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class VersionedPrompt$Type extends MessageType<VersionedPrompt> {
+    constructor() {
+        super("polay.v1.VersionedPrompt", [
+            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "version", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<VersionedPrompt>): VersionedPrompt {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.name = "";
+        message.version = "";
+        if (value !== undefined)
+            reflectionMergePartial<VersionedPrompt>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: VersionedPrompt): VersionedPrompt {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string name */ 1:
+                    message.name = reader.string();
+                    break;
+                case /* string version */ 2:
+                    message.version = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: VersionedPrompt, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string name = 1; */
+        if (message.name !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.name);
+        /* string version = 2; */
+        if (message.version !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.version);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message polay.v1.VersionedPrompt
+ */
+export const VersionedPrompt = new VersionedPrompt$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class EvalScore$Type extends MessageType<EvalScore> {
     constructor() {
@@ -242,14 +302,14 @@ export const EvalScore = new EvalScore$Type();
 class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
     constructor() {
         super("polay.v1.RecordEvalRequest", [
-            { no: 1, name: "versioned_eval", kind: "message", T: () => VersionedEval },
-            { no: 2, name: "base_tag", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "eval_scores", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => EvalScore }
+            { no: 1, name: "eval", kind: "message", T: () => Eval },
+            { no: 2, name: "prompt", kind: "message", T: () => VersionedPrompt },
+            { no: 3, name: "base_version", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "eval_scores", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => EvalScore }
         ]);
     }
     create(value?: PartialMessage<RecordEvalRequest>): RecordEvalRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.baseTag = "";
         message.evalScores = [];
         if (value !== undefined)
             reflectionMergePartial<RecordEvalRequest>(this, message, value);
@@ -260,13 +320,16 @@ class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* polay.v1.VersionedEval versioned_eval */ 1:
-                    message.versionedEval = VersionedEval.internalBinaryRead(reader, reader.uint32(), options, message.versionedEval);
+                case /* polay.v1.Eval eval */ 1:
+                    message.eval = Eval.internalBinaryRead(reader, reader.uint32(), options, message.eval);
                     break;
-                case /* string base_tag */ 2:
-                    message.baseTag = reader.string();
+                case /* polay.v1.VersionedPrompt prompt */ 2:
+                    message.prompt = VersionedPrompt.internalBinaryRead(reader, reader.uint32(), options, message.prompt);
                     break;
-                case /* repeated polay.v1.EvalScore eval_scores */ 3:
+                case /* optional string base_version */ 3:
+                    message.baseVersion = reader.string();
+                    break;
+                case /* repeated polay.v1.EvalScore eval_scores */ 4:
                     message.evalScores.push(EvalScore.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
@@ -281,15 +344,18 @@ class RecordEvalRequest$Type extends MessageType<RecordEvalRequest> {
         return message;
     }
     internalBinaryWrite(message: RecordEvalRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* polay.v1.VersionedEval versioned_eval = 1; */
-        if (message.versionedEval)
-            VersionedEval.internalBinaryWrite(message.versionedEval, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* string base_tag = 2; */
-        if (message.baseTag !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.baseTag);
-        /* repeated polay.v1.EvalScore eval_scores = 3; */
+        /* polay.v1.Eval eval = 1; */
+        if (message.eval)
+            Eval.internalBinaryWrite(message.eval, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* polay.v1.VersionedPrompt prompt = 2; */
+        if (message.prompt)
+            VersionedPrompt.internalBinaryWrite(message.prompt, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* optional string base_version = 3; */
+        if (message.baseVersion !== undefined)
+            writer.tag(3, WireType.LengthDelimited).string(message.baseVersion);
+        /* repeated polay.v1.EvalScore eval_scores = 4; */
         for (let i = 0; i < message.evalScores.length; i++)
-            EvalScore.internalBinaryWrite(message.evalScores[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+            EvalScore.internalBinaryWrite(message.evalScores[i], writer.tag(4, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
