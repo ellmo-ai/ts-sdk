@@ -10,12 +10,18 @@ import { RecordEvalRequest, RecordEvalResponse, EvalOutcome } from '../gen/polay
 import chalk from 'chalk';
 import { execSync } from 'child_process';
 
+type Prompt = {
+    name: string,
+    version: string,
+    class: ts.ClassDeclaration
+};
+
 const program = new Command()
     .version('1.0.0')
     .description('CLI to run evals')
     .requiredOption('-path, --path <path>', 'Path to the prompt file to run evals for')
-    .option('--base <base>', 'Base tag to compare against, if not provided will use the base SHA.')
-    .action(async ({ path: promptPath, base }: { path: string, base: string }) => {
+    .option('--base <base>', 'Base version to compare against, if not provided will use the previous version.')
+    .action(async ({ path: promptPath, base }: { path: string, base?: string }) => {
         let config: Config;
         try {
             config = new Config();
@@ -23,9 +29,6 @@ const program = new Command()
             console.error('Error:', error);
             process.exit(1);
         }
-
-        const baseSHA = base ?? execSync('git merge-base --fork-point HEAD').toString().trim();
-        const headSHA = execSync('git rev-parse HEAD').toString().trim();
 
         const workingDirectory = process.cwd();
         const absolutePath = path.resolve(workingDirectory, promptPath);
@@ -38,8 +41,8 @@ const program = new Command()
 
         const evalFilesToRun = getEvalFilesToRun(config, classes);
 
-        for (const { file, exportName } of evalFilesToRun) {
-            console.log('Running eval file:', file, 'with export:', exportName);
+        for (const { file, exportName, prompt } of evalFilesToRun) {
+            console.log(`Running ${file} for ${prompt.name} v${prompt.version}...`);
 
             let ev: Eval<any, any> | undefined;
             try {
@@ -68,7 +71,7 @@ const program = new Command()
                 hashToIOPair.set(score.hash, score.io);
             }
 
-            const payload = formPayload(ev, scores, { base: baseSHA, head: headSHA });
+            const payload = formPayload(ev, scores, prompt, base);
 
             let response: RecordEvalResponse;
             try {
@@ -92,7 +95,7 @@ const program = new Command()
                     console.log(chalk.red('Eval regressed!'));
                     break;
                 case EvalOutcome.NO_CHANGE:
-                    console.log('Eval did not significantly change.');
+                    console.log(chalk.green('Eval did not significantly change.'));
                     break;
                 case EvalOutcome.UNKNOWN:
                     console.log('Eval outcome unknown.');
@@ -137,26 +140,26 @@ const program = new Command()
 
 program.parse(process.argv);
 
-function formPayload(ev: Eval<any, any>, scores: EvalScores, sha: {
-    base: string,
-    head: string
-}): RecordEvalRequest {
+function formPayload(ev: Eval<any, any>, scores: EvalScores, prompt: Prompt, base?: string): RecordEvalRequest {
     return {
-        versionedEval: {
+        eval: {
             name: ev.id,
-            tag: sha.head
         },
+        prompt: {
+            name: prompt.name,
+            version: prompt.version,
+        },
+        baseVersion: base,
         evalScores: scores.map(score => {
             return {
                 evalHash: score.hash,
                 score: score.score
             }
         }),
-        baseTag: sha.base,
     };
 }
 
-function getPromptClasses(config: Config, promptPath: string): ts.ClassDeclaration[] {
+function getPromptClasses(config: Config, promptPath: string) {
     const sourceFile = ts.createSourceFile(
         promptPath,
         fs.readFileSync(promptPath, 'utf-8'),
@@ -164,32 +167,72 @@ function getPromptClasses(config: Config, promptPath: string): ts.ClassDeclarati
         true
     );
 
-    let classes: ts.ClassDeclaration[] = [];
-    // Check source file for any classes with the @HasEval decorator
-    ts.forEachChild(sourceFile, (node) => {
-        if (ts.isClassDeclaration(node)) {
-            const hasEvalDecorator = node.modifiers?.some(modifier => {
-                if (ts.isDecorator(modifier)) {
-                    if (ts.isCallExpression(modifier.expression)) {
-                        return ts.isIdentifier(modifier.expression.expression) &&
-                            modifier.expression.expression.text === 'HasEval';
-                    } else if (ts.isIdentifier(modifier.expression)) {
-                        return modifier.expression.text === 'HasEval';
-                    }
-                }
-                return false;
-            });
+    // Get the prompt name and version from each class with the @HasEval decorator
+    const prompts: Prompt[] = [];
 
-            if (hasEvalDecorator) {
-                classes.push(node);
+    let hasPromptImport = false;
+    ts.forEachChild(sourceFile, (node) => {
+        if (ts.isImportDeclaration(node)) {
+            const moduleSpecifier = node.moduleSpecifier as ts.StringLiteral;
+            if (moduleSpecifier.text === '@polay-ai/ts-sdk/dist/prompt') {
+                const namedImports = node.importClause?.namedBindings as ts.NamedImports;
+                if (namedImports.elements.some(importSpecifier => {
+
+
+                    // Check if the import is named 'Prompt' or aliased to 'Prompt'
+                    hasPromptImport ||= importSpecifier.name.text === 'Prompt' || importSpecifier.propertyName?.text === 'Prompt';
+                })) {
+                    return;
+                }
             }
         }
     });
 
-    return classes;
+    if (!hasPromptImport) {
+        return [];
+    }
+
+    ts.forEachChild(sourceFile, (node) => {
+        if (ts.isClassDeclaration(node)) {
+            const decorators = node.modifiers?.filter(mod => ts.isDecorator(mod));
+            if (!decorators) {
+                return;
+            }
+
+            const hasEval = decorators.some(decorator => {
+                if (ts.isDecorator(decorator)) {
+                    return (decorator.expression as ts.Identifier).text === 'HasEval';
+                }
+                return false;
+            });
+
+            if (hasEval) {
+                let name: string | undefined = undefined;
+                let version: string | undefined = undefined;
+
+                ts.forEachChild(node, (child) => {
+                    if (ts.isPropertyDeclaration(child)) {
+                        if (child.name.getText() === 'id') {
+                            const initializer = child.initializer as ts.StringLiteral;
+                            name = initializer.text;
+                        } else if (child.name.getText() === 'version') {
+                            const initializer = child.initializer as ts.StringLiteral;
+                            version = initializer.text;
+                        }
+                    }
+                });
+
+                if (name && version) {
+                    prompts.push({ name, version, class: node });
+                }
+            }
+        }
+    });
+
+    return prompts;
 }
 
-function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { file: string, exportName: string }[] {
+function getEvalFilesToRun(config: Config, prompts: Prompt[]) {
     const evalFiles = getAllFilesMatchingPattern(config.getPath("evals"), /\.eval.ts$/);
 
     // Get the list of eval files that use the classes with the @HasEval decorator
@@ -201,9 +244,9 @@ function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { fi
             true
         );
 
-        let shouldRun = false;
+        let shouldRun: ReturnType<typeof getPromptClasses>[number] | undefined = undefined;
         let evalExport: string | undefined = undefined;
-        let importEval = false; // Check if Eval is imported from the sdk
+        let importEvalName: string | undefined = undefined;
 
         ts.forEachChild(evalSourceFile, (node) => {
             if (ts.isImportDeclaration(node)) {
@@ -214,14 +257,15 @@ function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { fi
                         // Check if the import is named 'Eval' or aliased to 'Eval'
                         return importSpecifier.name.text === 'Eval' || importSpecifier.propertyName?.text === 'Eval';
                     })) {
-                        importEval = true;
+                        importEvalName = namedImports.elements.find(importSpecifier => {
+                            return importSpecifier.name.text === 'Eval' || importSpecifier.propertyName?.text === 'Eval';
+                        })?.name.text;
                     }
                 }
             }
         });
 
-        console.log(importEval, evalFile);
-        if (!importEval) {
+        if (!importEvalName) {
             return;
         }
 
@@ -235,13 +279,12 @@ function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { fi
 
                 const [declaration] = declarations;
                 const initializer = declaration.initializer as ts.CallExpression | undefined;
-
                 if (!initializer) {
                     return;
                 }
 
                 const name = (initializer.expression as ts.Identifier).text;
-                if (name !== 'Eval') {
+                if (name !== importEvalName) {
                     return;
                 }
 
@@ -258,9 +301,10 @@ function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { fi
                     return false;
                 });
 
+                // Check if the prompt is a target Prompt class
                 if (prompt && ts.isIdentifier((prompt as ts.PropertyAssignment).initializer)) {
                     const identifier = (prompt as ts.PropertyAssignment).initializer as ts.Identifier;
-                    shouldRun = classes.some(clazz => clazz.name?.text === identifier.text);
+                    shouldRun = prompts.find(clazz => clazz.name === identifier.text);
                     evalExport = (declaration.name as ts.Identifier).text;
                 }
             } else if (ts.isExportAssignment(node)) {
@@ -278,15 +322,15 @@ function getEvalFilesToRun(config: Config, classes: ts.ClassDeclaration[]): { fi
 
                     if (prompt && ts.isIdentifier((prompt as ts.PropertyAssignment).initializer)) {
                         const identifier = (prompt as ts.PropertyAssignment).initializer as ts.Identifier;
-                        shouldRun = classes.some(clazz => clazz.name?.text === identifier.text);
+                        shouldRun = prompts.find(clazz => clazz.name === identifier.text);
                         evalExport = 'default';
                     }
                 }
             }
         });
 
-        return shouldRun ? { file: evalFile, exportName: evalExport! } : undefined;
-    }).filter(Boolean) as { file: string, exportName: string }[];
+        return shouldRun ? { file: evalFile, exportName: evalExport!, prompt: shouldRun } : undefined;
+    }).filter(Boolean) as { file: string, exportName: string, prompt: ReturnType<typeof getPromptClasses>[number] }[];
 
     return evalFilesToRun;
 }
