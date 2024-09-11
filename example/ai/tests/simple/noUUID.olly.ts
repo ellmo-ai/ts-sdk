@@ -1,4 +1,4 @@
-import { Test } from "@polay-ai/ts-sdk/dist/test";
+import { Test } from "@ellmo-ai/ts-sdk/dist/test";
 
 export const noUUID = new Test({
     id: 'noUUID',

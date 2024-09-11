@@ -14,14 +14,14 @@ jobs:
       - name: Checkout proto files
         uses: actions/checkout@v3
         with:
-          repository: polay-ai/backend
+          repository: ellmo-ai/backend
           token: ${{ secrets.SYNC_TOKEN }}
           path: backend
 
       - name: Checkout ts-sdk
         uses: actions/checkout@v3
         with:
-          repository: polay-ai/ts-sdk
+          repository: ellmo-ai/ts-sdk
           token: ${{ secrets.SYNC_TOKEN }}
           path: ts-sdk
 

@@ -1,4 +1,4 @@
-import { Test } from "@polay-ai/ts-sdk/dist/test";
+import { Test } from "@ellmo-ai/ts-sdk/dist/test";
 
 type Input = {
     result: string;

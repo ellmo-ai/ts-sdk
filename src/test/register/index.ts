@@ -43,8 +43,8 @@ async function uploadToS3(url: string, buffer: Buffer): Promise<void> {
 }
 
 program
-    .name('ollyllm-cli')
-    .description('CLI to validate OllyLLM test files')
+    .name('ellmo-cli')
+    .description('CLI to validate Ellmo test files')
     .action(async () => {
         let config: Config;
         try {

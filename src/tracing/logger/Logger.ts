@@ -11,13 +11,12 @@ import { TestExecutionRequest } from '../../gen/polay/v1/test';
 
 class State {
     public _currentSpan: AsyncLocalStorage<Span | undefined> = new AsyncLocalStorage<Span | undefined>();
-    public _currentLogger: AsyncLocalStorage<Logger | undefined> = new AsyncLocalStorage<Logger | undefined>();
 }
 
 export type LoggerOptions = {
     /** The API key to use for the logger */
     apiKey: string;
-    /** The base URL of the OllyLLM server */
+    /** The base URL of the Ellmo server */
     baseUrl: string;
     /** Whether to enable debug mode */
     debug?: boolean;

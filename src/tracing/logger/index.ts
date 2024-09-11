@@ -7,10 +7,10 @@ let logger: Logger | undefined;
 /** Initialize the logger */
 export function init(opts: LoggerOptions): Logger {
     if (!opts.apiKey) {
-        throw new Error('OllyLLM: apiKey is required');
+        throw new Error('Ellmo: apiKey is required');
     }
     if (!opts.baseUrl) {
-        throw new Error('OllyLLM: baseUrl is required');
+        throw new Error('Ellmo: baseUrl is required');
     }
 
     logger = Logger.init({
@@ -105,7 +105,7 @@ export namespace Tracing {
     export function trace<T>(name: string, callback: () => T): T;
     export function trace<T>(name?: string, callback?: () => T): T | DecoratorFn {
         if (!logger) {
-            console.warn('OllyLLM: Logger not initialized. Call init() before using Traced.');
+            console.warn('Ellmo: Logger not initialized. Call init() before using Traced.');
         }
 
         if (typeof callback === "function") {

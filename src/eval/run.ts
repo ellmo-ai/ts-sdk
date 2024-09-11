@@ -8,7 +8,6 @@ import { Config } from '../config';
 import { Eval, EvalScores } from '.';
 import { RecordEvalRequest, RecordEvalResponse, EvalOutcome } from '../gen/polay/v1/eval';
 import chalk from 'chalk';
-import { execSync } from 'child_process';
 
 type Prompt = {
     name: string,
@@ -178,7 +177,7 @@ function getPromptClasses(config: Config, promptPath: string) {
     ts.forEachChild(sourceFile, (node) => {
         if (ts.isImportDeclaration(node)) {
             const moduleSpecifier = node.moduleSpecifier as ts.StringLiteral;
-            if (moduleSpecifier.text === '@polay-ai/ts-sdk/dist/prompt') {
+            if (moduleSpecifier.text === '@ellmo-ai/ts-sdk/dist/prompt') {
                 const namedImports = node.importClause?.namedBindings as ts.NamedImports;
                 if (namedImports.elements.some(importSpecifier => {
 
@@ -255,7 +254,7 @@ function getEvalFilesToRun(config: Config, prompts: Prompt[]) {
         ts.forEachChild(evalSourceFile, (node) => {
             if (ts.isImportDeclaration(node)) {
                 const moduleSpecifier = node.moduleSpecifier as ts.StringLiteral;
-                if (moduleSpecifier.text === '@polay-ai/ts-sdk/dist/eval') {
+                if (moduleSpecifier.text === '@ellmo-ai/ts-sdk/dist/eval') {
                     const namedImports = node.importClause?.namedBindings as ts.NamedImports;
                     if (namedImports.elements.some(importSpecifier => {
                         // Check if the import is named 'Eval' or aliased to 'Eval'

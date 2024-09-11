@@ -5,8 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
-  '@polay-ai/ts-sdk':
-    specifier: link:../
+  '@ellmo-ai/ts-sdk':
+    specifier: link:..
     version: link:..
   typescript:
     specifier: ^5.4.5

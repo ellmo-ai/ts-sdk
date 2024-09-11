@@ -1,6 +1,6 @@
 {
-  "name": "@polay-ai/ts-sdk",
-  "version": "0.0.14",
+  "name": "@ellmo-ai/ts-sdk",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {

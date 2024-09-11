@@ -5,7 +5,7 @@ import { GrpcTransport } from "@protobuf-ts/grpc-transport";
 import { ChannelCredentials } from "@grpc/grpc-js";
 import { PolayServiceClient } from "../gen/polay/v1/polay.client";
 
-export interface OllyLLMConfig {
+export interface EllmoConfig {
     /** Base URL for the API */
     apiBaseUrl: string;
     /** Base URL for the gRPC API */
@@ -27,7 +27,7 @@ export interface OllyLLMConfig {
 }
 
 /** 
- * Finds the nearest ollyllm.config.json file starting from the given directory 
+ * Finds the nearest ellmo.config.json file starting from the given directory 
  * 
  * @param startDir The starting directory for the search
  * @returns The config file path, if it is found
@@ -35,31 +35,31 @@ export interface OllyLLMConfig {
 export function findConfigFile(startDir: string): string {
     let currentDir = startDir;
     while (currentDir !== path.parse(currentDir).root) {
-        const configPath = path.join(currentDir, 'ollyllm.config.json');
+        const configPath = path.join(currentDir, 'ellmo.config.json');
         if (fs.existsSync(configPath)) {
             return configPath;
         }
         currentDir = path.dirname(currentDir);
     }
 
-    throw new Error('ollyllm.config.json not found in the current directory or any parent directory.');
+    throw new Error('ellmo.config.json not found in the current directory or any parent directory.');
 }
 
 /** 
- * Reads and parses the OllyLLM config file
+ * Reads and parses the Ellmo config file
  * 
  * @param configPath The path of the config
  * @returns The parsed config object
  */
-export function readConfig(configPath: string): OllyLLMConfig {
+export function readConfig(configPath: string): EllmoConfig {
     const configContent = fs.readFileSync(configPath, 'utf-8');
-    return JSON.parse(configContent) as OllyLLMConfig;
+    return JSON.parse(configContent) as EllmoConfig;
 }
 
 export class Config {
     private configPath: string;
 
-    public opts: OllyLLMConfig;
+    public opts: EllmoConfig;
     private allowedDeps: Trie;
     public rpcClient: PolayServiceClient;
 
@@ -68,7 +68,7 @@ export class Config {
         this.configPath = findConfigFile(currentDir);
 
         if (!this.configPath) {
-            throw new Error('ollyllm.config.json not found in the current directory or any parent directory.');
+            throw new Error('ellmo.config.json not found in the current directory or any parent directory.');
         }
 
         this.opts = readConfig(this.configPath);
@@ -78,7 +78,7 @@ export class Config {
                 ...this.opts.tests,
                 testsPath: this.resolveRelativePath(this.opts.tests.testsPath),
                 packageJsonPath: this.resolveRelativePath(this.opts.tests.packageJsonPath),
-                includeDependencies: [...this.opts.tests.includeDependencies, '@polay-ai/*'],
+                includeDependencies: [...this.opts.tests.includeDependencies, '@ellmo-ai/*'],
             },
             prompts: {
                 ...this.opts.prompts,

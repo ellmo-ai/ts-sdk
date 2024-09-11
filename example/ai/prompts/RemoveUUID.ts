@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 
-import { Prompt } from "@polay-ai/ts-sdk/dist/prompt"
-import { HasEval } from "@polay-ai/ts-sdk/dist/eval"
+import { Prompt } from "@ellmo-ai/ts-sdk/dist/prompt"
+import { HasEval } from "@ellmo-ai/ts-sdk/dist/eval"
 
 const openai = new OpenAI({
     apiKey: '',

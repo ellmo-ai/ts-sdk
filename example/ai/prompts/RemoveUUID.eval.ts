@@ -1,4 +1,4 @@
-import { Eval } from "@polay-ai/ts-sdk/dist/eval";
+import { Eval } from "@ellmo-ai/ts-sdk/dist/eval";
 import { RemoveUUID } from "./RemoveUUID";
 
 export default new Eval({
