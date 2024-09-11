@@ -84,6 +84,10 @@ const program = new Command()
 
             console.log('');
 
+            printScores(scores.map(s => s.score), response.previousEvalScores.map(s => s.score));
+
+            console.log('');
+
             let color = undefined;
             switch (response.outcome) {
                 case EvalOutcome.IMPROVEMENT:
@@ -351,4 +355,17 @@ function getAllFilesMatchingPattern(dir: string, pattern: RegExp): string[] {
     });
 
     return matchingFiles;
+}
+
+function printScores(currentScores: number[], previousScores: number[]) {
+    function format(label: string, scores: number[]) {
+        const scoresString = '[' + scores.join(', ') + ']';
+        return `${label.padEnd(18)}${scoresString}`;
+    }
+
+    const currentScoresFormatted = format('Scores:', currentScores);
+    const previousScoresFormatted = format('Previous scores:', previousScores);
+
+    console.log(currentScoresFormatted);
+    console.log(previousScoresFormatted);
 }

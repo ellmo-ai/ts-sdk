@@ -2,7 +2,6 @@ import OpenAI from "openai";
 
 import { Prompt } from "@polay-ai/ts-sdk/dist/prompt"
 import { HasEval } from "@polay-ai/ts-sdk/dist/eval"
-// import { wrappedOpenAI } from "@polay-ai/ts-sdk/dist/tracing/wrap/openai";
 
 const openai = new OpenAI({
     apiKey: '',
@@ -15,7 +14,7 @@ export class RemoveUUID extends Prompt<string, string> {
     protected model = "gpt-4o-mini";
 
     protected get systemPrompt(): string {
-        return "You will be given a string that may include UUIDs. Only return the string with UUIDs removed.";
+        return "You will be given a string that may include UUIDs. Only return the string with the UUIDs removed.";
     }
 
     protected async prepare(): Promise<(input: string) => Promise<string>> {
