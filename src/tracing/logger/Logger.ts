@@ -1,13 +1,13 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { Span } from "./trace";
 import { omit } from '../../util/omit';
-import { PolayServiceClient } from '../../gen/polay/v1/polay.client';
+import { EllmoServiceClient } from '../../gen/ellmo/v1/polay.client';
 import { GrpcTransport } from '@protobuf-ts/grpc-transport';
 import { ChannelCredentials } from '@grpc/grpc-js';
-import { ReportSpanRequest, Span as SpanProto } from '../../gen/polay/v1/span';
+import { ReportSpanRequest, Span as SpanProto } from '../../gen/ellmo/v1/span';
 import { Timestamp } from '../../gen/google/protobuf/timestamp';
 import { Test } from '../../test';
-import { TestExecutionRequest } from '../../gen/polay/v1/test';
+import { TestExecutionRequest } from '../../gen/ellmo/v1/test';
 
 class State {
     public _currentSpan: AsyncLocalStorage<Span | undefined> = new AsyncLocalStorage<Span | undefined>();
@@ -33,7 +33,7 @@ export class Logger {
 
     private _apiKey: string;
     private _debug: boolean;
-    private client: PolayServiceClient;
+    private client: EllmoServiceClient;
 
     private constructor(opts: LoggerOptions) {
         this._apiKey = opts.apiKey;
@@ -43,7 +43,7 @@ export class Logger {
             host: opts.baseUrl,
             channelCredentials: ChannelCredentials.createInsecure(),
         });
-        this.client = new PolayServiceClient(transport);
+        this.client = new EllmoServiceClient(transport);
 
         this._timeout = setInterval(() => this.flush(), FLUSH_INTERVAL_MS);
     }

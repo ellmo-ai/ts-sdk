@@ -4,10 +4,17 @@ import { Command } from 'commander';
 import path from 'path';
 import ts from 'typescript';
 import fs from 'fs';
-import { Config } from '../config';
+import { Config } from '../config/index.js';
 import { Eval, EvalScores } from '.';
-import { RecordEvalRequest, RecordEvalResponse, EvalOutcome } from '../gen/polay/v1/eval';
+import { RecordEvalRequest, RecordEvalResponse, EvalOutcome } from '../gen/ellmo/v1/eval.js';
 import chalk from 'chalk';
+
+require('ts-node').register({
+    transpileOnly: true,
+    compilerOptions: {
+        module: 'commonjs',
+    },
+});
 
 type Prompt = {
     name: string,

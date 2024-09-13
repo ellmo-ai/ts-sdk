@@ -1,0 +1,22 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Ellmo Run Evals
+        uses: ./.github/actions/eval
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: ./example
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

@@ -3,7 +3,7 @@ import fs from 'fs';
 import { Trie } from "./trie";
 import { GrpcTransport } from "@protobuf-ts/grpc-transport";
 import { ChannelCredentials } from "@grpc/grpc-js";
-import { PolayServiceClient } from "../gen/polay/v1/polay.client";
+import { EllmoServiceClient } from "../gen/ellmo/v1/polay.client";
 
 export interface EllmoConfig {
     /** Base URL for the API */
@@ -61,7 +61,7 @@ export class Config {
 
     public opts: EllmoConfig;
     private allowedDeps: Trie;
-    public rpcClient: PolayServiceClient;
+    public rpcClient: EllmoServiceClient;
 
     constructor() {
         const currentDir = process.cwd();
@@ -100,7 +100,7 @@ export class Config {
             host: this.opts.rpcBaseUrl,
             channelCredentials: ChannelCredentials.createInsecure(),
         });
-        this.rpcClient = new PolayServiceClient(transport);
+        this.rpcClient = new EllmoServiceClient(transport);
     }
 
     public isDependencyAllowed(dependency: string): boolean {

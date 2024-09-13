@@ -30,10 +30,10 @@ function execute(args) {
         process.exit(1);
     }
 
-    execSync(`ts-node ${path.join(__dirname, 'dist/test/execute.js')} --path ${options.path} --test ${options.test} ${input}`, { stdio: 'inherit' });
+    execSync(`node ${path.join(__dirname, 'dist/test/execute.js')} --path ${options.path} --test ${options.test} ${input}`, { stdio: 'inherit' });
 }
 
-function eval(args) {
+function runEval(args) {
     function parseArgs() {
         const options = {};
 
@@ -48,12 +48,12 @@ function eval(args) {
 
     const { options } = parseArgs();
 
-    execSync(`ts-node ${path.join(__dirname, 'dist/eval/eval.js')} --path ${options.path}`, { stdio: 'inherit' });
+    execSync(`node ${path.join(__dirname, 'dist/eval/run.js')} --path ${options.path}`, { stdio: 'inherit' });
 }
 
 const commandMap = {
-    register: () => execSync(`ts-node ${path.join(__dirname, 'dist/test/register/index.js')}`, { stdio: 'inherit' }),
-    eval: eval,
+    register: () => execSync(`node ${path.join(__dirname, 'dist/test/register/index.js')}`, { stdio: 'inherit' }),
+    eval: runEval,
     execute: execute,
 };
 

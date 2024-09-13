@@ -1,0 +1,104 @@
+name: 'Ellmo Run Evals'
+description: 'Run Ellmo evals on changed LLM prompts.'
+inputs:
+  working-directory:
+    description: 'Working directory for the action'
+    required: false
+    default: '.'
+  config-path:
+    description: 'Path to the ellmo.config.json file'
+    required: false
+    default: './ellmo.config.json'
+  github-token:
+    description: 'GitHub token'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    # - name: Setup ts-node
+    #   run: npm install -g ts-node
+    #   shell: bash
+    
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4.0.0
+      with:
+        version: 8.10.5
+
+    - name: Install dependencies
+      run: pnpm install
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Get changed files
+      id: changed-files
+      # Fake the output to "example/ai/prompts/RemoveUUID.ts", needs to be outputs.all_changed_files
+      run: | 
+        echo "example/ai/prompts/RemoveUUID.ts" > changed-files.txt
+        echo "::set-output name=all_changed_files::$(cat changed-files.txt)"
+
+    # - name: Get changed files
+    #   id: changed-files
+    #   uses: tj-actions/changed-files@v35
+    #   with:
+    #     token: ${{ inputs.github-token }}
+
+    - name: Run associated evals
+      run: |
+        config_content=$(cat ${{ inputs.config-path }})
+        promptsPath=$(echo "$config_content" | jq -r .prompts.promptsPath)
+
+        # Prepend the promptsPath with the working directory
+        promptsPath="${{ inputs.working-directory }}/$promptsPath"
+        
+        normalize_path() {
+          local path="$1"
+          local result=""
+          
+          # Split the path into components
+          IFS='/' read -ra parts <<< "$path"
+          
+          for part in "${parts[@]}"; do
+              case "$part" in
+                  "." | "") continue ;; # Skip current directory and empty parts
+                  "..") 
+                      # Remove the last component for parent directory
+                      result=${result%/*}
+                      ;;
+                  *)
+                      # Add the component to the result
+                      result+="/$part"
+                      ;;
+              esac
+          done
+          
+          # If the original path was absolute (started with /), keep it absolute
+          [[ $path == /* ]] || result=${result#/}
+          
+          # If the result is empty, return "." (current directory)
+          echo "${result:-./}"
+        }
+
+        fullPromptsPath=$(normalize_path "$promptsPath")
+        echo "Full prompts path: $fullPromptsPath"
+
+        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          if [[ $file == $fullPromptsPath/* ]]; then
+            echo "Checking file: $file"
+            npx @ellmo-ai/ts-sdk eval --path "$file"
+            if [ $? -ne 0 ]; then
+              echo "Check failed for $file"
+              exit 1
+            fi
+          fi
+        done
+      working-directory: ${{ inputs.working-directory }}
