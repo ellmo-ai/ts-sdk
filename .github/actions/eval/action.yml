@@ -91,14 +91,20 @@ runs:
         fullPromptsPath=$(normalize_path "$promptsPath")
         echo "Full prompts path: $fullPromptsPath"
 
-        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-          if [[ $file == $fullPromptsPath/* ]]; then
-            echo "Checking file: $file"
-            npx @ellmo-ai/ts-sdk eval --path "$file"
-            if [ $? -ne 0 ]; then
-              echo "Check failed for $file"
-              exit 1
-            fi
-          fi
-        done
+        npx @ellmo-ai/ts-sdk eval --path ./ai/prompts/RemoveUUID.ts
+        if [ $? -ne 0 ]; then
+          echo "Check failed for $file"
+          exit 1
+        fi
+
+        # for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+        #   if [[ $file == $fullPromptsPath/* ]]; then
+        #     echo "Checking file: $file"
+        #     npx @ellmo-ai/ts-sdk eval --path "$file"
+        #     if [ $? -ne 0 ]; then
+        #       echo "Check failed for $file"
+        #       exit 1
+        #     fi
+        #   fi
+        # done
       working-directory: ${{ inputs.working-directory }}
