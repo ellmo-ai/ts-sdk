@@ -25,10 +25,6 @@ runs:
       with:
         node-version: '18'
     
-    # - name: Setup ts-node
-    #   run: npm install -g ts-node
-    #   shell: bash
-    
     - name: Setup pnpm
       uses: pnpm/action-setup@v4.0.0
       with:
@@ -54,57 +50,86 @@ runs:
 
     - name: Run associated evals
       run: |
+        # Prepend ./ to the working directory if it's not already there
+        wd="${{ inputs.working-directory }}"
+        if [[ ${{ inputs.working-directory }} != ./* ]]; then
+          wd="./${{ inputs.working-directory }}"
+        fi
+
         config_content=$(cat ${{ inputs.config-path }})
         promptsPath=$(echo "$config_content" | jq -r .prompts.promptsPath)
 
-        # Prepend the promptsPath with the working directory
-        promptsPath="${{ inputs.working-directory }}/$promptsPath"
-        
-        normalize_path() {
+        simplify_path() {
           local path="$1"
-          local result=""
-          
+          local stack=()
+          local IFS='/'
+
+          # Check if the path is provided
+          if [ -z "$path" ]; then
+              echo "Error: No path provided." >&2
+              return 1
+          fi
+
           # Split the path into components
-          IFS='/' read -ra parts <<< "$path"
-          
-          for part in "${parts[@]}"; do
-              case "$part" in
-                  "." | "") continue ;; # Skip current directory and empty parts
-                  "..") 
-                      # Remove the last component for parent directory
-                      result=${result%/*}
+          read -ra components <<< "$path"
+
+          # Process each component
+          for component in "${components[@]}"; do
+              case "$component" in
+                  ""|".")
+                      # Ignore empty components and current directory (.)
+                      continue
+                      ;;
+                  "..")
+                      # Go up one directory
+                      if [ ${#stack[@]} -gt 0 ]; then
+                          unset 'stack[${#stack[@]}-1]'
+                      fi
                       ;;
                   *)
-                      # Add the component to the result
-                      result+="/$part"
+                      # Add component to stack
+                      stack+=("$component")
                       ;;
               esac
           done
-          
-          # If the original path was absolute (started with /), keep it absolute
-          [[ $path == /* ]] || result=${result#/}
-          
-          # If the result is empty, return "." (current directory)
-          echo "${result:-./}"
+
+          # Construct the simplified path
+          local simplified_path
+          if [ ${#stack[@]} -eq 0 ]; then
+              simplified_path="/"
+          else
+              simplified_path=$(IFS='/'; echo "${stack[*]}")
+          fi
+
+          echo "$simplified_path"
         }
 
-        fullPromptsPath=$(normalize_path "$promptsPath")
-        echo "Full prompts path: $fullPromptsPath"
+        remove_path_prefix() {
+          local full_path="$1"
+          local prefix="$2"
 
-        npx @ellmo-ai/ts-sdk eval --path ./ai/prompts/RemoveUUID.ts
-        if [ $? -ne 0 ]; then
-          echo "Check failed for $file"
-          exit 1
-        fi
+          # Remove leading './' from both paths to normalize them
+          full_path="${full_path#./}"
+          prefix="${prefix#./}"
 
-        # for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-        #   if [[ $file == $fullPromptsPath/* ]]; then
-        #     echo "Checking file: $file"
-        #     npx @ellmo-ai/ts-sdk eval --path "$file"
-        #     if [ $? -ne 0 ]; then
-        #       echo "Check failed for $file"
-        #       exit 1
-        #     fi
-        #   fi
-        # done
+          # Remove the prefix and echo the result
+          result="${full_path#$prefix/}"
+          echo "./$result"
+        }
+
+        promptsPath=$(simplify_path "${wd}/${promptsPath}")
+
+        for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          if [[ $file == $promptsPath/* ]]; then
+            
+            # Remove the working directory from the file path
+            file=$(remove_path_prefix "$file" "$wd")
+
+            npx @ellmo-ai/ts-sdk eval --path "$file"
+            if [ $? -ne 0 ]; then
+              echo "Check failed for $file"
+              exit 1
+            fi
+          fi
+        done
       working-directory: ${{ inputs.working-directory }}
