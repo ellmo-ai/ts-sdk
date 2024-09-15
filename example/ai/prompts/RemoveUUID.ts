@@ -4,17 +4,17 @@ import { Prompt } from "@ellmo-ai/ts-sdk/dist/prompt"
 import { HasEval } from "@ellmo-ai/ts-sdk/dist/eval"
 
 const openai = new OpenAI({
-    apiKey: '',
+    apiKey: process.env.OPENAI_API_KEY,
 });
 
 @HasEval
 export class RemoveUUID extends Prompt<string, string> {
     protected id = "RemoveUUID";
-    protected version = "0.0.1";
+    protected version = "0.0.4";
     protected model = "gpt-4o-mini";
 
     protected get systemPrompt(): string {
-        return "You will be given a string that may include UUIDs. Only return the string with the UUIDs removed.";
+        return "You will be given a string that may include UUIDs. Return the string with the UUIDs removed.";
     }
 
     protected async prepare(): Promise<(input: string) => Promise<string>> {

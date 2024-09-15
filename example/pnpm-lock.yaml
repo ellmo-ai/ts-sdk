@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@ellmo-ai/ts-sdk':
-    specifier: ^0.0.1
-    version: 0.0.1(@types/node@22.5.4)
+    specifier: 0.0.1-prerelease3
+    version: 0.0.1-prerelease3(@types/node@22.5.5)
   typescript:
     specifier: ^5.4.5
     version: 5.5.2
@@ -21,8 +21,8 @@ packages:
       '@jridgewell/trace-mapping': 0.3.9
     dev: false
 
-  /@ellmo-ai/ts-sdk@0.0.1(@types/node@22.5.4):
-    resolution: {integrity: sha512-Hh116cpTe/4/5EEuUiIXeqvDyRJaWCSiroS5k5/N1td/X5y9zGZKDK64AcctN2sNsaJ1a3DXZ1SuHWUa9zrjrw==}
+  /@ellmo-ai/ts-sdk@0.0.1-prerelease3(@types/node@22.5.5):
+    resolution: {integrity: sha512-74qUK+nt86yaLAkbrOPT3W6jdqtVvyejumM0rQZDOc0tm5qGJNPFlRrgIyWoAIBqtgTSvJa73D0n3pe0jx4f7Q==}
     hasBin: true
     dependencies:
       '@grpc/grpc-js': 1.11.2
@@ -34,9 +34,9 @@ packages:
       axios: 1.7.7
       chalk: 4.1.2
       commander: 12.1.0
-      openai: 4.60.0
+      openai: 4.61.0
       simple-git: 3.26.0
-      ts-node: 10.9.2(@types/node@22.5.4)(typescript@5.5.2)
+      ts-node: 10.9.2(@types/node@22.5.5)(typescript@5.5.2)
       typescript: 5.5.2
       uuid: 9.0.1
       yargs: 17.7.2
@@ -225,7 +225,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 22.5.4
+      '@types/node': 22.5.5
       form-data: 4.0.0
     dev: false
 
@@ -235,14 +235,14 @@ packages:
       undici-types: 5.26.5
     dev: false
 
-  /@types/node@22.5.4:
-    resolution: {integrity: sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==}
+  /@types/node@22.5.5:
+    resolution: {integrity: sha512-Xjs4y5UPO/CLdzpgR6GirZJx36yScjh73+2NlLlkFRSoQN8B0DpfXPdZGnvVmLRLOsqDpOfTNv7D9trgGhmOIA==}
     dependencies:
       undici-types: 6.19.8
     dev: false
 
-  /@types/qs@6.9.15:
-    resolution: {integrity: sha512-uXHQKES6DQKKCLh441Xv/dwxOq1TVS3JPUMlEqoEglvlhR6Mxnlew/Xq/LRVHpLyk7iK3zODe1qYHIMltO7XGg==}
+  /@types/qs@6.9.16:
+    resolution: {integrity: sha512-7i+zxXdPD0T4cKDuxCUXJ4wHcsJLwENa6Z3dCu8cfCK743OGy5Nu1RmAGqDPsoTDINVEcdXKRvR/zre+P2Ku1A==}
     dev: false
 
   /abort-controller@3.0.0:
@@ -783,8 +783,8 @@ packages:
     engines: {node: '>= 0.4'}
     dev: false
 
-  /openai@4.60.0:
-    resolution: {integrity: sha512-U/wNmrUPdfsvU1GrKRP5mY5YHR3ev6vtdfNID6Sauz+oquWD8r+cXPL1xiUlYniosPKajy33muVHhGS/9/t6KA==}
+  /openai@4.61.0:
+    resolution: {integrity: sha512-xkygRBRLIUumxzKGb1ug05pWmJROQsHkGuj/N6Jiw2dj0dI19JvbFpErSZKmJ/DA+0IvpcugZqCAyk8iLpyM6Q==}
     hasBin: true
     peerDependencies:
       zod: ^3.23.8
@@ -794,7 +794,7 @@ packages:
     dependencies:
       '@types/node': 18.19.50
       '@types/node-fetch': 2.6.11
-      '@types/qs': 6.9.15
+      '@types/qs': 6.9.16
       abort-controller: 3.0.0
       agentkeepalive: 4.5.0
       form-data-encoder: 1.7.2
@@ -846,7 +846,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 22.5.4
+      '@types/node': 22.5.5
       long: 5.2.3
     dev: false
 
@@ -1035,7 +1035,7 @@ packages:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
     dev: false
 
-  /ts-node@10.9.2(@types/node@22.5.4)(typescript@5.5.2):
+  /ts-node@10.9.2(@types/node@22.5.5)(typescript@5.5.2):
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
     hasBin: true
     peerDependencies:
@@ -1054,7 +1054,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 22.5.4
+      '@types/node': 22.5.5
       acorn: 8.12.1
       acorn-walk: 8.3.4
       arg: 4.1.3

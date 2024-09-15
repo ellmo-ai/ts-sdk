@@ -145,6 +145,10 @@ const program = new Command()
                     console.log(chalk.bold(`Score: ${color(`${score.previousScore} -> ${score.currentScore}`)}`));
                 }
             }
+
+            if (response.outcome === EvalOutcome.REGRESSION) {
+                process.exit(1);
+            }
         }
     });
 

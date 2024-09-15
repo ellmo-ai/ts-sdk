@@ -1,6 +1,6 @@
 {
   "name": "@ellmo-ai/ts-sdk",
-  "version": "0.0.1",
+  "version": "0.0.1-prerelease3",
   "description": "",
   "main": "index.js",
   "scripts": {
