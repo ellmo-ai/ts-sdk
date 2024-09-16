@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@ellmo-ai/ts-sdk':
-    specifier: 0.0.1-prerelease3
-    version: 0.0.1-prerelease3(@types/node@22.5.5)
+    specifier: 0.0.1-prerelease4
+    version: 0.0.1-prerelease4(@types/node@22.5.5)
   typescript:
     specifier: ^5.4.5
     version: 5.5.2
@@ -21,8 +21,8 @@ packages:
       '@jridgewell/trace-mapping': 0.3.9
     dev: false
 
-  /@ellmo-ai/ts-sdk@0.0.1-prerelease3(@types/node@22.5.5):
-    resolution: {integrity: sha512-74qUK+nt86yaLAkbrOPT3W6jdqtVvyejumM0rQZDOc0tm5qGJNPFlRrgIyWoAIBqtgTSvJa73D0n3pe0jx4f7Q==}
+  /@ellmo-ai/ts-sdk@0.0.1-prerelease4(@types/node@22.5.5):
+    resolution: {integrity: sha512-iTdeedZBB4FGU1XNIhwibkwfIDH1455mwbUie7kPsjw+DJhciI74wJeZ0dtTJC+562rLa/0XZVHFu2kQS18yQQ==}
     hasBin: true
     dependencies:
       '@grpc/grpc-js': 1.11.2

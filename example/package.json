@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ellmo-ai/ts-sdk": "0.0.1-prerelease3",
+    "@ellmo-ai/ts-sdk": "0.0.1-prerelease4",
     "typescript": "^5.4.5"
   }
 }

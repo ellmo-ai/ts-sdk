@@ -58,7 +58,12 @@ const commandMap = {
 };
 
 if (command in commandMap) {
-    commandMap[command](process.argv.slice(3));
+    try {
+        commandMap[command](process.argv.slice(3));
+    } catch (e) {
+        console.error(e);
+        process.exit(1);
+    }
 } else {
     console.error(`Unknown command: ${command}`);
     process.exit(1);
