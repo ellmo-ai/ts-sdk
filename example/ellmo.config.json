@@ -1,6 +1,6 @@
 {
-    "apiBaseUrl": "3.17.190.212:3000",
-    "rpcBaseUrl": "3.17.190.212:50051",
+    "apiBaseUrl": "3.23.128.128:3000",
+    "rpcBaseUrl": "3.23.128.128:50051",
     "tests": {
         "testsPath": "./ai/tests",
         "packageJsonPath": "./package.json",
