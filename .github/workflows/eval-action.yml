@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Ellmo Run Evals
-        uses: ./.github/actions/eval
+        uses: ellmo-ai/eval-gh-action@v0.0.1-prerelease   
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: example
