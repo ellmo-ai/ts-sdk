@@ -10,11 +10,11 @@ const openai = new OpenAI({
 @HasEval
 export class RemoveUUID extends Prompt<string, string> {
     protected id = "RemoveUUID";
-    protected version = "0.0.1";
+    protected version = "0.0.2";
     protected model = "gpt-4o-mini";
 
     protected get systemPrompt(): string {
-        return "You will be given a string that may include UUIDs. Return the string with the UUIDs removed.";
+        return "You will be given a string that may include UUIDs. Remove all UUIDs from the string. Respond with only the resulting string."
     }
 
     protected async prepare(): Promise<(input: string) => Promise<string>> {
